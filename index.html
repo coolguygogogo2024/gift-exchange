@@ -245,6 +245,8 @@ body{
 .admin-row input{height:36px;padding:0 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text);outline:none;transition:border .15s}
 .admin-row input:focus{border-color:var(--primary-light)}
 .admin-row input.wide{width:160px}.admin-row input.mid{width:85px}.admin-row input.tiny{width:55px}
+.admin-row input[type=number]::-webkit-outer-spin-button,.admin-row input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.admin-row input[type=number]{-moz-appearance:textfield}
 .admin-list{display:flex;flex-direction:column;gap:3px}
 .admin-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:8px;font-size:12px;background:var(--bg-surface);flex-wrap:wrap;gap:6px;color:var(--text)}
 .admin-item .meta{color:var(--text3);font-size:11px}
@@ -394,10 +396,10 @@ body{
       <div class="admin-card">
         <h3>添加礼物</h3>
         <div class="admin-row" id="giftAddRow">
-          <input class="wide" id="gName" placeholder="名称">
-          <input class="tiny" id="gEmoji" placeholder="🎁" maxlength="4">
+          <input class="wide" id="gName" placeholder="礼物名称">
+          <input class="tiny" id="gEmoji" placeholder="图标" maxlength="4">
           <input class="tiny" id="gCost" type="number" placeholder="积分" value="100" min="1">
-          <input class="tiny" id="gQty" type="number" value="1" min="1">
+          <input class="tiny" id="gQty" type="number" placeholder="数量" value="1" min="1">
           <select class="mid" id="gTier" style="height:36px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);outline:none;padding:0 8px">
             <option value="s">S级 ≥100分</option>
             <option value="b">B级 ≥65分</option>
@@ -796,7 +798,7 @@ try{
   const rawCost=parseInt(document.getElementById('gCost')?.value);
   const cost=isNaN(rawCost)?(TIERS[tier]&&TIERS[tier].threshold)||100:rawCost;
   if(!nm||q<1||cost<1){toast('请完整填写','error');return}
-  D.gifts.push({id:uid(),name:nm,emoji:em||'🎁',total:q,used:0,cost,tier});
+  D.gifts.push({id:uid(),name:nm,emoji:em,total:q,used:0,cost,tier});
   save();render();renderAdminLists();toast(`已添加 ${nm}`);
   document.getElementById('gName').value='';document.getElementById('gEmoji').value='';document.getElementById('gQty').value='1';document.getElementById('gCost').value='100';
 
@@ -806,10 +808,10 @@ try{
 function editGift(id){
   const g=D.gifts.find(x=>x.id===id);if(!g)return;
   document.getElementById('giftAddRow').innerHTML=`
-    <input class="wide" id="egName" value="${esc(g.name)}">
-    <input class="tiny" id="egEmoji" value="${esc(g.emoji||'🎁')}" maxlength="4">
-    <input class="tiny" id="egCost" type="number" value="${g.cost}" min="1">
-    <input class="tiny" id="egQty" type="number" value="${g.total}" min="${g.used}">
+    <input class="wide" id="egName" placeholder="礼物名称" value="${esc(g.name)}">
+    <input class="tiny" id="egEmoji" placeholder="图标" value="${esc(g.emoji)}" maxlength="4">
+    <input class="tiny" id="egCost" type="number" placeholder="积分" value="${g.cost}" min="1">
+    <input class="tiny" id="egQty" type="number" placeholder="数量" value="${g.total}" min="${g.used}">
     <select class="mid" id="egTier" style="height:36px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;padding:0 8px">
       <option value="s"${g.tier==='s'?' selected':''}>S级 ≥100分</option>
       <option value="b"${g.tier==='b'?' selected':''}>B级 ≥65分</option>
@@ -825,7 +827,7 @@ function saveGift(id){
     const nEl=document.getElementById('egName'),eEl=document.getElementById('egEmoji'),qEl=document.getElementById('egQty'),tEl=document.getElementById('egTier'),cEl=document.getElementById('egCost');
     if(!nEl||!qEl||!tEl){toast('表单异常，请刷新重试','error');return}
     g.name=nEl.value.trim();
-    g.emoji=(eEl&&eEl.value.trim())||g.emoji||'🎁';
+    g.emoji=eEl?eEl.value.trim():'';
     const newQ=parseInt(qEl.value);if(isNaN(newQ)||newQ<1)return;
     g.total=newQ;
     g.tier=tEl.value;
