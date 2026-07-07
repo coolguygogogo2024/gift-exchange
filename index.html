@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星辰 · 盛夏逐光</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Ocean Deep — 7级蓝色梯度（主色系）*/
+  --ocean-900: #0A2540;
+  --ocean-700: #0A3D62;
+  --ocean-500: #0077B6;
+  --ocean-400: #00B4D8;
+  --ocean-300: #48CAE4;
+  --ocean-200: #90E0EF;
+  --ocean-100: #CAF0F8;
+  --ocean-50:  #F0F9FF;
+
+  /* Accent — 极少量使用 */
+  --coral: #FF6B5E;
+  --coral-light: #FFE8E5;
+  --sun: #FFB347;
+  --sun-light: #FFF3DB;
+  --sun-border: #FFD97A;
+  --sun-text: #C98400;
+  --coral-border: #FFB3AC;
+  --coral-text: #D4493D;
+  --palm: #3CB878;
+
+  /* Functional */
+  --card: #FFFFFF;
+  --text: #0A2540;
+  --text2: #4A5568;
+  --text3: #94A3B8;
+  --border: #E2E8F0;
+  --cream: #F7FAFC;
+
+  /* Tier colors */
+  --s-gold: #FFB347;
+  --s-gold-bg: #FFF3DB;
+  --b-silver: #00B4D8;
+  --b-silver-bg: #CAF0F8;
+  --a-bronze: #FF6B5E;
+  --a-bronze-bg: #FFE8E5;
+
+  /* Backwards-compat aliases (JS may reference these) */
+  --sand: #F0F9FF;
+  --sky: #CAF0F8;
+  --ocean: #0077B6;
+  --ocean-deep: #0A2540;
+  --sunny: #FFB347;
+  --sunny-light: #FFF3DB;
+  --palm-light: #E6F7EF;
+  --watermelon: #FF6B5E;
+  --ks-rule-strong: #E2E8F0;
+  --accent-bright: #00B4D8;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{
+  font-family:'Nunito Sans','PingFang SC','Microsoft YaHei',-apple-system,sans-serif;
+  background:var(--ocean-50);
+  background-image:
+    radial-gradient(ellipse 800px 400px at 50% 0%, var(--ocean-200) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 300px at 50% 100%, var(--ocean-100) 0%, transparent 50%);
+  background-attachment:fixed;
+  color:var(--text);line-height:1.6;min-height:100vh;
+  animation:pageIn .4s ease;
+}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--ocean-50)}
+::-webkit-scrollbar-thumb{background:var(--ocean-300);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--ocean-400)}
+
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+
+/* Wave Divider */
+.wave-divider{display:block;width:100%;height:48px;margin:-1px 0}
+.wave-divider svg{width:100%;height:100%;display:block}
+
+/* Hero */
+.hero{
+  text-align:center;padding:56px 0 32px;animation:heroIn .5s ease;
+  position:relative;
+}
+@keyframes heroIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+.hero-kicker{
+  font-family:'Rubik','PingFang SC',sans-serif;
+  font-size:12px;font-weight:500;color:var(--ocean-400);
+  letter-spacing:.2em;margin-bottom:12px;
+  text-transform:uppercase;
+}
+.hero h1{
+  font-family:'Rubik','PingFang SC',sans-serif;
+  font-size:clamp(28px,4.5vw,38px);font-weight:700;
+  color:var(--ocean-900);line-height:1.2;margin-bottom:6px;
+}
+.hero h1 .dream{
+  background:linear-gradient(135deg,var(--ocean-400),var(--ocean-500));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero .subtitle{
+  font-size:15px;color:var(--ocean-500);letter-spacing:.04em;margin-top:8px;
+  font-weight:600;
+}
+.hero-deco{
+  position:absolute;top:20px;right:-20px;width:120px;height:120px;
+  opacity:.15;pointer-events:none;
+}
+.hero-deco svg{width:100%;height:100%}
+
+/* Query Section */
+.query-section{max-width:780px;margin:0 auto 36px;display:grid;grid-template-columns:1fr 1fr;gap:16px;animation:sectionIn .4s ease .1s both}
+@keyframes sectionIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.query-card{
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:16px;
+  box-shadow:0 8px 32px rgba(0,119,182,.08);
+  padding:28px 24px;text-align:center;
+}
+.query-card:first-child{border-top:4px solid var(--ocean-500)}
+.query-card:last-child{border-top:4px solid var(--ocean-400)}
+.query-card .label{
+  font-family:'Rubik','PingFang SC',sans-serif;
+  font-size:17px;font-weight:600;color:var(--ocean-700);
+  margin-bottom:16px;letter-spacing:.02em;text-align:center;
+}
+.query-row{display:flex;flex-direction:column;align-items:center;gap:10px}
+.query-row input{width:100%;text-align:center}
+.query-card input,.query-card select{
+  height:48px;padding:0 16px;
+  background:var(--ocean-50);border:1.5px solid var(--border);
+  border-radius:10px;font-size:16px;font-family:inherit;color:var(--text);outline:none;
+  transition:border .15s,box-shadow .15s;
+}
+.query-card input:focus,.query-card select:focus{
+  border-color:var(--ocean-400);background:#fff;
+  box-shadow:0 0 0 3px rgba(0,180,216,.12);
+}
+.query-card input::placeholder{color:var(--text3)}
+.query-card select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%2348CAE4' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer;padding-right:32px}
+.query-card select option{background:#fff;color:var(--text)}
+.points-box{
+  display:flex;align-items:baseline;gap:8px;margin-top:14px;padding:12px 18px;
+  background:linear-gradient(135deg,var(--ocean-100),var(--ocean-50));
+  border:1px solid var(--ocean-200);border-radius:10px;
+}
+.points-box .pts-label{font-size:13px;color:var(--text);font-weight:600}
+.points-box .pts-value{
+  font-family:'Rubik','PingFang SC',sans-serif;
+  font-size:38px;font-weight:800;color:var(--ocean-500);line-height:1;
+}
+.points-box .pts-empty{font-size:13px;color:var(--text3)}
+
+/* Tier Sections */
+.tier-section{margin-bottom:32px}
+.tier-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.tier-badge{
+  padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;
+  font-family:'Rubik','PingFang SC',sans-serif;letter-spacing:.03em;
+}
+.tier-badge.s{background:var(--sun-light);color:var(--sun-text);border:1px solid var(--sun-border)}
+.tier-badge.b{background:var(--ocean-100);color:var(--ocean-500);border:1px solid var(--ocean-300)}
+.tier-badge.a{background:var(--coral-light);color:var(--coral-text);border:1px solid var(--coral-border)}
+.tier-threshold{font-size:12px;color:var(--text2);margin-left:4px}
+.tier-header span:last-child{margin-left:auto;font-size:12px;font-weight:600;color:var(--ocean-500)}
+
+/* Gift Grid */
+.gift-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.gift-card{
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);
+  background-image:linear-gradient(135deg,#fff 60%,var(--ocean-50) 100%);
+  border:1px solid var(--border);
+  border-radius:14px;padding:14px 16px 14px 20px;
+  box-shadow:0 2px 8px rgba(0,119,182,.06);
+  transition:all .2s ease;
+  opacity:0;animation:cardIn .3s ease forwards;
+  position:relative;overflow:hidden;
+}
+.gift-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:var(--ocean-400);border-radius:14px 0 0 14px;
+  transition:width .2s ease;
+}
+.gift-card.s::before{background:var(--sun)}
+.gift-card.b::before{background:var(--ocean-400)}
+.gift-card.a::before{background:var(--coral)}
+.gift-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 24px rgba(0,119,182,.15);
+  border-color:var(--ocean-200);
+}
+.gift-card:hover::before{width:6px}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.gift-card.sold-out{opacity:.4;pointer-events:none}
+.gift-card.sold-out::before{background:var(--text3)}
+.gift-card .gift-icon{
+  width:42px;height:42px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  background:var(--ocean-100);
+}
+.gift-card .gift-body{flex:1;min-width:0}
+.gift-card .gift-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gift-card .gift-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.gift-card .gift-stock{
+  margin-left:auto;font-size:11px;font-weight:600;padding:3px 10px;
+  border-radius:10px;white-space:nowrap;background:var(--ocean-50);color:var(--ocean-700);
+}
+.gift-card .gift-stock.low{color:var(--coral);background:var(--coral-light)}
+
+/* Modal */
+.modal-mask{position:fixed;inset:0;z-index:200;background:rgba(10,37,64,.4);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;animation:fadeIn .15s}
+@keyframes fadeIn{from{opacity:0}}
+.modal{width:calc(100% - 32px);max-width:380px;background:#fff;border:1px solid var(--ocean-100);border-radius:16px;padding:32px;box-shadow:0 12px 48px rgba(0,119,182,.15);animation:popIn .2s ease}
+@keyframes popIn{from{transform:scale(.97) translateY(12px);opacity:0}}
+.modal h3{font-family:'Rubik','PingFang SC',sans-serif;font-size:17px;margin-bottom:4px;font-weight:700;color:var(--ocean-900)}
+.modal .sub{font-size:12px;color:var(--text2);margin-bottom:20px}
+.fields{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.fields input{height:42px;padding:0 14px;background:var(--ocean-50);border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--text);outline:none;transition:border .15s,box-shadow .15s}
+.fields input:focus{border-color:var(--ocean-400);box-shadow:0 0 0 3px rgba(0,180,216,.12)}
+.fields input::placeholder{color:var(--text3)}
+.qty-row{display:flex;align-items:center;gap:10px}
+.qty-row input[type=number]{width:64px;text-align:center}
+.qty-sum{font-size:12px;color:var(--text2)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+
+/* Buttons */
+.btn{height:40px;padding:0 20px;border:none;border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s}
+.btn:active{transform:scale(.97)}
+.btn:focus-visible{outline:2px solid var(--ocean-400);outline-offset:2px}
+.btn-primary{background:linear-gradient(135deg,var(--ocean-500),var(--ocean-400));color:#fff}
+.btn-primary:hover{background:linear-gradient(135deg,var(--ocean-700),var(--ocean-500));box-shadow:0 4px 12px rgba(0,119,182,.3)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.btn-ghost{background:transparent;color:var(--text2);border:1.5px solid var(--border)}
+.btn-ghost:hover{border-color:var(--ocean-400);color:var(--ocean-500);background:var(--ocean-50)}
+.btn-small{height:36px;padding:0 14px;font-size:13px}
+
+/* Toast */
+.toast-rack{position:fixed;top:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:6px}
+.toast-msg{padding:12px 20px;border-radius:10px;font-size:13px;font-weight:550;background:var(--ocean-900);color:#fff;box-shadow:0 4px 16px rgba(10,37,64,.2);animation:slideIn .25s ease;max-width:300px}
+@keyframes slideIn{from{transform:translateX(80px);opacity:0}}
+.toast-msg.success{border-left:3px solid var(--ocean-400)}
+.toast-msg.error{border-left:3px solid var(--coral)}
+
+/* Admin Trigger */
+.admin-trigger{text-align:center;margin:36px 0 50px}
+.admin-trigger button{background:none;border:none;color:var(--text3);font-size:12px;font-family:inherit;cursor:pointer;font-weight:500;transition:color .15s}
+.admin-trigger button:hover{color:var(--ocean-500)}
+
+/* Admin Overlay */
+.admin-overlay{position:fixed;inset:0;z-index:500;background:var(--ocean-50);overflow-y:auto}
+.admin-shell{max-width:800px;margin:0 auto;padding:20px 24px 40px}
+.admin-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--ocean-100);margin-bottom:20px}
+.admin-topbar h2{font-family:'Rubik','PingFang SC',sans-serif;font-size:17px;font-weight:700;color:var(--ocean-900)}
+.admin-tabs{display:flex;gap:4px;margin-bottom:20px}
+.admin-tab{padding:7px 16px;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;background:transparent;color:var(--text2);transition:all .12s}
+.admin-tab:hover{background:var(--ocean-100);color:var(--ocean-700)}
+.admin-tab.active{background:var(--ocean-500);color:#fff}
+.admin-content{display:none}
+.admin-content:not([style*="display:none"]){display:block}
+.admin-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,119,182,.04)}
+.admin-card h3{font-family:'Rubik','PingFang SC',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--ocean-900)}
+.admin-row{display:flex;gap:6px;flex-wrap:wrap;align-items:end;margin-bottom:8px}
+.admin-row input{height:36px;padding:0 10px;background:var(--ocean-50);border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text);outline:none;transition:border .15s}
+.admin-row input:focus{border-color:var(--ocean-400)}
+.admin-row input.wide{width:160px}.admin-row input.mid{width:85px}.admin-row input.tiny{width:55px}
+.admin-list{display:flex;flex-direction:column;gap:3px}
+.admin-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:8px;font-size:12px;background:var(--ocean-50);flex-wrap:wrap;gap:6px;color:var(--text)}
+.admin-item .meta{color:var(--text3);font-size:11px}
+.act-btn{height:26px;padding:0 8px;border:none;border-radius:6px;font-size:11px;font-family:inherit;cursor:pointer;background:transparent;color:var(--text2);transition:all .12s}
+.act-btn:hover{background:var(--ocean-100);color:var(--ocean-500)}
+
+#giftDropdown option.s-tier{color:var(--sun-text);font-weight:700}
+#giftDropdown option.b-tier{color:var(--ocean-500);font-weight:600}
+#giftDropdown option.a-tier{color:var(--coral-text);font-weight:600}
+#giftDropdown option.sold-out{color:var(--text3)}
+
+/* Footer */
+.site-footer{text-align:center;padding:40px 0 48px;margin-top:20px;position:relative}
+.site-footer .footer-title{font-family:'Rubik','PingFang SC',sans-serif;font-size:15px;font-weight:700;color:var(--ocean-900);margin-bottom:4px}
+.site-footer .footer-sub{font-size:12px;color:var(--text3)}
+
+@media(max-width:600px){
+  .hero{padding:36px 0 24px}
+  .hero-kicker{font-size:11px}
+  .hero h1{font-size:24px}
+  .hero .subtitle{font-size:13px}
+  .hero-deco{display:none}
+  .wave-divider{height:32px}
+  .gift-grid{grid-template-columns:1fr}
+  .query-section{grid-template-columns:1fr;gap:12px}
+  .query-card{padding:20px 16px}
+  .query-card .label{font-size:16px;margin-bottom:12px}
+  .query-card input,.query-card select{height:44px;font-size:15px}
+  .points-box .pts-value{font-size:32px}
+  .gift-card{padding:10px 12px 10px 16px}
+  .gift-card .gift-icon{width:38px;height:38px;font-size:18px}
+  .modal{padding:24px 20px}
+  .modal h3{font-size:16px}
+  .fields input{height:40px;font-size:15px}
+  .btn{height:38px;font-size:13px}
+  .wrap{padding:0 16px}
+  .admin-shell{padding:16px}
+  .admin-card{padding:16px}
+  .admin-row{gap:4px}
+  .admin-row input.wide{width:100%}
+  .admin-item{font-size:13px;padding:8px 10px}
+  .tier-header{flex-wrap:wrap;gap:4px}
+  .tier-header span:last-child{margin-left:0;width:100%;text-align:right}
+  .site-footer{padding:28px 0 36px}
+  .site-footer .footer-title{font-size:14px}
+  .site-footer .footer-sub{font-size:11px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div class="toast-rack" id="toasts"></div>
+<main class="wrap">
+
+  <div class="hero">
+    <div class="hero-kicker">OST · SUMMER 2026</div>
+    <h1>星辰 · 盛夏逐光 <span class="dream">Dream</span></h1>
+    <div class="subtitle">积分兑换礼物商城 · 让每一份努力都被看见</div>
+    <div class="hero-deco">
+      <svg viewBox="0 0 120 120" fill="none">
+        <path d="M10,40 Q30,20 50,40 T90,40 T130,40" stroke="var(--ocean-300)" stroke-width="3" fill="none" opacity=".5"/>
+        <path d="M10,55 Q30,35 50,55 T90,55 T130,55" stroke="var(--ocean-400)" stroke-width="3" fill="none" opacity=".4"/>
+        <path d="M10,70 Q30,50 50,70 T90,70 T130,70" stroke="var(--ocean-500)" stroke-width="3" fill="none" opacity=".3"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 48" preserveAspectRatio="none">
+      <path d="M0,24 C240,48 480,0 720,24 C960,48 1200,0 1440,24 L1440,48 L0,48 Z" fill="var(--ocean-100)" opacity="0.5"/>
+      <path d="M0,32 C240,8 480,40 720,24 C960,8 1200,40 1440,24 L1440,48 L0,48 Z" fill="var(--ocean-200)" opacity="0.3"/>
+    </svg>
+  </div>
+
+  <div class="query-section">
+    <div class="query-card">
+      <div class="label">查询积分</div>
+      <div class="query-row">
+        <input type="text" id="streamerInput" placeholder="输入主播昵称或姓名" autocomplete="off">
+        <button class="btn btn-primary btn-small" onclick="queryStreamer()">查询积分</button>
+      </div>
+      <div class="points-box" id="pointsDisplay">
+        <span class="pts-empty">输入主播昵称或姓名，点击查询显示积分</span>
+      </div>
+    </div>
+    <div class="query-card">
+      <div class="label">兑换礼物</div>
+      <div id="exchangeStreamerName" style="font-size:12px;color:var(--text3);margin-bottom:10px;min-height:18px"></div>
+      <div style="margin-bottom:8px">
+        <input type="text" id="rdmName" placeholder="兑换人姓名（必填）" style="width:100%;margin-bottom:8px;text-align:center">
+        <select id="giftDropdown" style="width:100%;margin-bottom:8px" onchange="onGiftDropdownChange()">
+          <option value="">选择礼物</option>
+        </select>
+        <select id="operatorSelect" style="width:100%;margin-bottom:8px">
+          <option value="">选择运营</option>
+          <option>陈昀皓</option>
+          <option>郭灵波</option>
+          <option>李承阳</option>
+          <option>罗浩琛</option>
+          <option>彭闵</option>
+          <option>徐娜</option>
+          <option>许丽红</option>
+          <option>张艺霖</option>
+          <option>周宇</option>
+        </select>
+        <button class="btn btn-primary" onclick="quickRedeem()" style="width:100%;margin-top:4px">确认兑换</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin:40px 0 24px"><span style="font-family:'Rubik','PingFang SC',sans-serif;font-size:20px;font-weight:700;color:var(--ocean-900);letter-spacing:.04em">兑换礼物</span><div style="width:40px;height:3px;background:linear-gradient(90deg,var(--ocean-400),var(--ocean-300));margin:8px auto 0;border-radius:2px"></div></div>
+  <div id="giftArea"></div>
+
+  <div class="admin-trigger">
+    <button onclick="openAdminAuth()">⚙️ 管理后台</button>
+  </div>
+
+  <div class="wave-divider" style="margin-top:20px">
+    <svg viewBox="0 0 1440 48" preserveAspectRatio="none">
+      <path d="M0,24 C240,0 480,48 720,24 C960,0 1200,48 1440,24 L1440,0 L0,0 Z" fill="var(--ocean-100)" opacity="0.5"/>
+      <path d="M0,16 C240,40 480,8 720,24 C960,40 1200,8 1440,24 L1440,0 L0,0 Z" fill="var(--ocean-200)" opacity="0.3"/>
+    </svg>
+  </div>
+  <footer class="site-footer">
+    <p class="footer-title">星辰 · 盛夏逐光</p>
+    <p class="footer-sub">积分兑换礼物商城 · 让每一份努力都被看见</p>
+  </footer>
+</main>
+
+<!-- Admin Password Modal -->
+<div class="modal-mask" id="adminAuthModal" style="display:none">
+  <div class="modal" style="max-width:340px">
+    <h3>🔐 管理后台登录</h3>
+    <div class="sub">请输入管理密码</div>
+    <div class="fields">
+      <input type="password" id="adminPwd" placeholder="密码" onkeydown="if(event.key==='Enter')checkAdminAuth()">
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeAdminAuth()">取消</button>
+      <button class="btn btn-primary" onclick="checkAdminAuth()">登录</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Panel Overlay -->
+<div class="admin-overlay" id="adminOverlay" style="display:none">
+  <div class="admin-shell">
+    <div class="admin-topbar">
+      <h2>管理后台</h2>
+      <button class="btn btn-ghost btn-small" onclick="closeAdmin()">✕ 关闭</button>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('gifts')">🎁 礼物管理</button>
+      <button class="admin-tab" onclick="switchAdminTab('records')">📋 兑换记录</button>
+      <button class="admin-tab" onclick="switchAdminTab('streamers')">👤 主播管理</button>
+      <button class="admin-tab" onclick="switchAdminTab('data')">💾 数据</button>
+    </div>
+    <div class="admin-content" id="adminTabGifts">
+      <div class="admin-card">
+        <h3>添加礼物</h3>
+        <div class="admin-row" id="giftAddRow">
+          <input class="wide" id="gName" placeholder="名称">
+          <input class="tiny" id="gEmoji" placeholder="🎁" maxlength="4">
+          <input class="tiny" id="gCost" type="number" placeholder="积分" value="100" min="1">
+          <input class="tiny" id="gQty" type="number" value="1" min="1">
+          <select class="mid" id="gTier" style="height:36px;background:var(--cream);border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);outline:none;padding:0 8px">
+            <option value="s">S级 ≥100分</option>
+            <option value="b">B级 ≥65分</option>
+            <option value="a">A级 ≥45分</option>
+          </select>
+          <button class="btn btn-primary btn-small" onclick="addGift()">+ 添加</button>
+        </div>
+        <div class="admin-list" id="giftList"></div>
+      </div>
+    </div>
+    <div class="admin-content" id="adminTabRecords" style="display:none">
+      <div class="admin-card">
+        <h3>兑换记录</h3>
+        <div id="recordsList" class="admin-list">
+          <span style="color:var(--text3);font-size:13px">暂无兑换记录</span>
+        </div>
+      </div>
+    </div>
+    <div class="admin-content" id="adminTabStreamers" style="display:none">
+      <div class="admin-card">
+        <h3>添加主播</h3>
+        <div class="admin-row">
+          <input class="wide" id="sName" placeholder="昵称">
+          <input class="wide" id="sRealName" placeholder="实名（选填）">
+          <input class="tiny" id="sPts" type="number" placeholder="积分" min="0">
+          <select class="mid" id="sOperator" style="height:36px;background:var(--cream);border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);outline:none;padding:0 8px">
+            <option value="">选择运营</option>
+            <option>陈昀皓</option>
+            <option>郭灵波</option>
+            <option>李承阳</option>
+            <option>罗浩琛</option>
+            <option>彭闵</option>
+            <option>徐娜</option>
+            <option>许丽红</option>
+            <option>张艺霖</option>
+            <option>周宇</option>
+          </select>
+          <button class="btn btn-primary btn-small" onclick="addStreamer()">+ 添加</button>
+        </div>
+      </div>
+      <div class="admin-card">
+        <h3>主播列表</h3>
+        <div class="admin-list" id="streamerList"></div>
+      </div>
+    </div>
+    <div class="admin-content" id="adminTabData" style="display:none">
+      <div class="admin-card">
+        <h3>数据备份</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-small" onclick="exportData()">📥 导出JSON</button>
+          <button class="btn btn-ghost btn-small" onclick="document.getElementById('impFile').click()">📤 导入JSON</button>
+          <button class="btn btn-ghost btn-small" style="color:#c0392b" onclick="resetAll()">🔄 重置全部</button>
+          <input type="file" id="impFile" accept=".json" hidden onchange="importData(event)">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== GLOBAL ERROR HANDLER =====
+window.onerror=function(msg){console.error("JS error:",msg);return false;};
+
+// ========== REAL GIFT DATA ==========
+const TIERS = {s:{label:'S级奖励',badge:'s',threshold:100,color:'var(--s-gold)'},b:{label:'B级奖励',badge:'b',threshold:65,color:'var(--b-silver)'},a:{label:'≥45分',badge:'a',threshold:45,color:'var(--a-bronze)'}};
+const DEF={
+  gifts:[
+    // S级 ≥100分
+    {id:'s1',name:'月孵化保护卡（30天）',emoji:'🛡️',total:1,used:0,cost:100,tier:'s'},
+    {id:'s2',name:'专属VIP休息室（30天）',emoji:'👑',total:1,used:0,cost:100,tier:'s'},
+    {id:'s3',name:'专属VIP直播间（30天）',emoji:'📺',total:1,used:0,cost:100,tier:'s'},
+    {id:'s4',name:'指定化妆师（7天）',emoji:'💄',total:1,used:0,cost:100,tier:'s'},
+    {id:'s5',name:'个性化定制服装一套',emoji:'👗',total:2,used:0,cost:100,tier:'s'},
+    {id:'s6',name:'舞蹈私教课 随心约（7天）',emoji:'💃',total:1,used:0,cost:100,tier:'s'},
+    {id:'s7',name:'专属庆功宴派对',emoji:'🎉',total:1,used:0,cost:100,tier:'s'},
+    {id:'s8',name:'月赛海选直通卡',emoji:'🎫',total:1,used:0,cost:100,tier:'s'},
+    {id:'s9',name:'档期奖励卡',emoji:'📅',total:2,used:0,cost:100,tier:'s'},
+    {id:'s10',name:'个人专属写真一套',emoji:'📸',total:2,used:0,cost:100,tier:'s'},
+    {id:'s11',name:'S级别伴舞团队',emoji:'🕺',total:1,used:0,cost:100,tier:'s'},
+    {id:'s12',name:'S级别游机团队',emoji:'🎥',total:1,used:0,cost:100,tier:'s'},
+    {id:'s13',name:'活动抽奖卷',emoji:'🎟️',total:2,used:0,cost:100,tier:'s'},
+    {id:'s14',name:'S级别豪华精美下午茶',emoji:'🍰',total:2,used:0,cost:100,tier:'s'},
+    // B级 ≥65分
+    {id:'b1',name:'大牌化妆品',emoji:'💋',total:3,used:0,cost:65,tier:'b'},
+    {id:'b2',name:'专属直播画面升级包',emoji:'⚡',total:3,used:0,cost:65,tier:'b'},
+    {id:'b3',name:'特殊定制妆造1次',emoji:'✨',total:3,used:0,cost:65,tier:'b'},
+    {id:'b4',name:'A级下午茶',emoji:'🍵',total:3,used:0,cost:65,tier:'b'},
+    {id:'b5',name:'活动抽奖卷',emoji:'🎟️',total:3,used:0,cost:65,tier:'b'},
+    {id:'b6',name:'7天孵化保护卡',emoji:'🛡️',total:3,used:0,cost:65,tier:'b'},
+    {id:'b7',name:'履约延误保护卡',emoji:'🛡️',total:3,used:0,cost:65,tier:'b'},
+    {id:'b8',name:'周赛海选直通卡',emoji:'🎫',total:3,used:0,cost:65,tier:'b'},
+    {id:'b9',name:'周赛游机卡',emoji:'🎥',total:3,used:0,cost:65,tier:'b'},
+    // A级 ≥45分
+    {id:'a1',name:'用户定制入场特效',emoji:'🌈',total:3,used:0,cost:45,tier:'a'},
+    {id:'a2',name:'A级专属画面调试升级',emoji:'🖥️',total:3,used:0,cost:45,tier:'a'},
+    {id:'a3',name:'A级休息室7天',emoji:'🛋️',total:3,used:0,cost:45,tier:'a'},
+    {id:'a4',name:'个人专属冠军海报定制',emoji:'🏆',total:3,used:0,cost:45,tier:'a'},
+  ],
+  streamers:[
+    {id:'db1',name:'瑞瑞',realName:'李瑞',operator:'彭闵',totalPts:209,usedPts:0},
+    {id:'db2',name:'子仪',realName:'滕梓怡',operator:'许丽红',totalPts:177,usedPts:0},
+    {id:'db3',name:'灰原哀',realName:'王珂',operator:'张艺霖',totalPts:167,usedPts:0},
+    {id:'db4',name:'烤眠羊',realName:'杨杨',operator:'许丽红',totalPts:133,usedPts:0},
+    {id:'db5',name:'代瓣蒜',realName:'代雨涵',operator:'陈昀皓',totalPts:132,usedPts:0},
+    {id:'db6',name:'鞋垫子',realName:'许诺',operator:'陈昀皓',totalPts:119,usedPts:0},
+    {id:'db7',name:'谁的天菜',realName:'王舒缇',operator:'郭灵波',totalPts:114,usedPts:0},
+    {id:'db8',name:'Mathias',realName:'桓雨生',operator:'许丽红',totalPts:114,usedPts:0},
+    {id:'db9',name:'鱼块',realName:'罗丝运',operator:'许丽红',totalPts:106,usedPts:0},
+    {id:'db10',name:'胖胖胖虎☡zᶻ',realName:'王蕊',operator:'许丽红',totalPts:104,usedPts:0},
+    {id:'db11',name:'文文',realName:'欧文英',operator:'彭闵',totalPts:98,usedPts:0},
+    {id:'db12',name:'蜡笔小歆',realName:'何芯莉',operator:'张艺霖',totalPts:98,usedPts:0},
+    {id:'db13',name:'唯一¹¹⁵⁹',realName:'丁唯一',operator:'郭灵波',totalPts:93,usedPts:0},
+    {id:'db14',name:'小鱼儿⁰¹¹⁰',realName:'刘枫',operator:'张艺霖',totalPts:90,usedPts:0},
+    {id:'db15',name:'朱瑞琪Ricky',realName:'朱瑞琪',operator:'张艺霖',totalPts:85,usedPts:0},
+    {id:'db16',name:'玖 Xin',realName:'陈玖妡',operator:'张艺霖',totalPts:80,usedPts:0},
+    {id:'db17',name:'思艾',realName:'张赛',operator:'许丽红',totalPts:80,usedPts:0},
+    {id:'db18',name:'窈窈',realName:'王兮窈',operator:'郭灵波',totalPts:75,usedPts:0},
+    {id:'db19',name:'酸奶大王',realName:'盛婷婷',operator:'张艺霖',totalPts:70,usedPts:0},
+    {id:'db20',name:'邪恶猫猫',realName:'黄依林',operator:'郭灵波',totalPts:66,usedPts:0},
+    {id:'db21',name:'泽田',realName:'周明杰',operator:'郭灵波',totalPts:61,usedPts:0},
+    {id:'db22',name:'吃一口曲奇',realName:'王云',operator:'李承阳',totalPts:60,usedPts:0},
+    {id:'db23',name:'Y.ang',realName:'黄扬',operator:'张艺霖',totalPts:56,usedPts:0},
+    {id:'db24',name:'kitty丸',realName:'徐欣怡',operator:'许丽红',totalPts:52,usedPts:0},
+    {id:'db25',name:'你看他真帅！',realName:'万扬',operator:'郭灵波',totalPts:51,usedPts:0},
+    {id:'db26',name:'嗯Enn',realName:'崔晨曦',operator:'郭灵波',totalPts:50,usedPts:0},
+    {id:'db27',name:'景淮',realName:'张添森',operator:'郭灵波',totalPts:50,usedPts:0},
+    {id:'db28',name:'芋泥啵啵',realName:'林文静',operator:'许丽红',totalPts:49,usedPts:0},
+    {id:'db29',name:'麦乐迪Melody🎶',realName:'刘逸如',operator:'许丽红',totalPts:49,usedPts:0},
+    {id:'db30',name:'花小花',realName:'聂兆钰',operator:'徐娜',totalPts:48,usedPts:0},
+    {id:'db31',name:'哦豁油貓餅',realName:'卢桔',operator:'陈昀皓',totalPts:47,usedPts:0},
+    {id:'db32',name:'汽水',realName:'李婷',operator:'张艺霖',totalPts:45,usedPts:0},
+    {id:'db33',name:'Big Shark',realName:'郑天宇',operator:'张艺霖',totalPts:44,usedPts:0},
+    {id:'db34',name:'林熙',realName:'张凌熙',operator:'徐娜',totalPts:41,usedPts:0},
+    {id:'db35',name:'只只',realName:'马嘉仪',operator:'张艺霖',totalPts:37,usedPts:0},
+    {id:'db36',name:'面包酱',realName:'冯雨晖',operator:'许丽红',totalPts:36,usedPts:0},
+    {id:'db37',name:'木圭.',realName:'李艾',operator:'许丽红',totalPts:35,usedPts:0},
+    {id:'db38',name:'夜神月-',realName:'成雨鑫',operator:'张艺霖',totalPts:35,usedPts:0},
+    {id:'db39',name:'MANNSSON!',realName:'颜峰',operator:'陈昀皓',totalPts:25,usedPts:0},
+    {id:'db40',name:'张垚！',realName:'张鹏程',operator:'许丽红',totalPts:25,usedPts:0},
+    {id:'db41',name:'小雨我萌',realName:'刘羽',operator:'陈昀皓',totalPts:24,usedPts:0},
+    {id:'db42',name:'眠眠小雨',realName:'李思雨',operator:'郭灵波',totalPts:23,usedPts:0},
+    {id:'db43',name:'知远 Leo',realName:'洪宇',operator:'徐娜',totalPts:23,usedPts:0},
+    {id:'db44',name:'欣欣子💕',realName:'王嘉欣',operator:'许丽红',totalPts:23,usedPts:0},
+    {id:'db45',name:'刘五冠希（兠匪）',realName:'刘子豪',operator:'徐娜',totalPts:22,usedPts:0},
+    {id:'db46',name:'早安梨宝',realName:'曾莎莎',operator:'陈昀皓',totalPts:21,usedPts:0},
+    {id:'db47',name:'鱼丸子🍡',realName:'虞家琪',operator:'张艺霖',totalPts:19,usedPts:0},
+    {id:'db48',name:'司琪琪琪⁴⁷⁷⁷',realName:'耿司琪',operator:'张艺霖',totalPts:19,usedPts:0},
+    {id:'db49',name:'林乔',realName:'刘梦娇',operator:'许丽红',totalPts:18,usedPts:0},
+    {id:'db50',name:'枫叶',realName:'周榆杰',operator:'徐娜',totalPts:14,usedPts:0},
+    {id:'db51',name:'frezy菲泽',realName:'陈仲伟',operator:'郭灵波',totalPts:13,usedPts:0},
+    {id:'db52',name:'小南瓜',realName:'王梓宁',operator:'许丽红',totalPts:13,usedPts:0},
+    {id:'db53',name:'是我冒饭了',realName:'车宇淇',operator:'陈昀皓',totalPts:10,usedPts:0},
+    {id:'db54',name:'在下猫猫雨',realName:'谢春雨',operator:'陈昀皓',totalPts:6,usedPts:0},
+    {id:'db55',name:'无敌大王',realName:'王奕凡',operator:'张艺霖',totalPts:5,usedPts:0},
+    {id:'db56',name:'高压锅',realName:'高博文',operator:'张艺霖',totalPts:5,usedPts:0},
+    {id:'db57',name:'糖果',realName:'刘芸嘉',operator:'张艺霖',totalPts:4,usedPts:0},
+    {id:'db58',name:'晕晕',realName:'何路窈',operator:'陈昀皓',totalPts:3,usedPts:0},
+    {id:'db59',name:'阿Q',realName:'张于凤',operator:'陈昀皓',totalPts:2,usedPts:0},
+    {id:'db60',name:'爱皱眉',realName:'方珺',operator:'张艺霖',totalPts:0,usedPts:0},
+    {id:'db61',name:'樾樾',realName:'石玥',operator:'陈昀皓',totalPts:0,usedPts:0},
+    {id:'db62',name:'椰子🥥（想你的椰版）',realName:'汪芮',operator:'徐娜',totalPts:0,usedPts:0}
+  ],
+  records:[]
+};
+
+const KEY='gx_star_v5';
+let D=(()=>{try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}return JSON.parse(JSON.stringify(DEF))})();
+function save(){localStorage.setItem(KEY,JSON.stringify(D))}
+if(!localStorage.getItem(KEY))save();
+
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const fmt=n=>n.toLocaleString('zh-CN');
+const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML};
+const remain=g=>g.total-g.used;
+let curStreamer=null,curOperator='';
+
+function toast(msg,type='success'){
+  const r=document.getElementById('toasts');const e=document.createElement('div');
+  e.className=`toast-msg ${type}`;e.textContent=msg;r.appendChild(e);
+  setTimeout(()=>{e.style.opacity='0';e.style.transition='opacity .3s';setTimeout(()=>e.remove(),300)},2500);
+}
+
+// ===== STREAMER =====
+function queryStreamer(){
+  const val=document.getElementById('streamerInput').value.trim();
+  if(!val){resetStreamer();toast('请输入主播昵称或姓名','error');return}
+  let s=D.streamers.find(x=>x.realName===val);
+  if(!s)s=D.streamers.find(x=>x.name===val);
+  if(!s){const lower=val.toLowerCase();const matches=D.streamers.filter(x=>x.name.toLowerCase().includes(lower));if(matches.length===1)s=matches[0];else if(matches.length>1){toast(`找到${matches.length}个匹配，请输入更精确的名称`,'error');return}}
+  if(!s){resetStreamer();toast('未找到该主播','error');return}
+  curStreamer=s.id;
+  curOperator=s.operator||'';
+  const os=document.getElementById('operatorSelect');os.value=s.operator||'';os.disabled=true;
+  // Auto-fill exchange card streamer name
+  const label=s.realName?s.name+'（'+s.realName+'）':s.name;
+  const exEl=document.getElementById('exchangeStreamerName');if(exEl)exEl.innerHTML='<span style="font-weight:600;color:var(--ocean-deep);font-size:14px">'+esc(label)+'</span>';
+  // Lock redeemer name to the streamer
+  const rd=document.getElementById('rdmName');if(rd){rd.value=label;rd.readOnly=true;rd.style.opacity='0.7'}
+  renderPoints();renderGifts();
+}
+function resetStreamer(){
+  curStreamer=null;curOperator='';
+  const os=document.getElementById('operatorSelect');os.disabled=false;os.value='';
+  const exEl=document.getElementById('exchangeStreamerName');if(exEl)exEl.innerHTML='<span style="color:var(--text3);font-size:12px">请先查询主播积分</span>';
+  const rd=document.getElementById('rdmName');if(rd){rd.value='';rd.readOnly=false;rd.style.opacity='1'}
+  renderPoints();renderGifts();
+}
+function renderPoints(){
+  const el=document.getElementById('pointsDisplay');
+  if(!curStreamer){el.innerHTML='<span class="pts-empty">输入主播昵称或姓名，点击查询显示积分</span>';return}
+  const s=D.streamers.find(x=>x.id===curStreamer);if(!s){el.innerHTML='<span class="pts-empty">未找到</span>';return}
+  const remain=s.totalPts-s.usedPts;
+  const label=s.realName?s.name+'（'+s.realName+'）':s.name;
+  el.innerHTML=`<span class="pts-label">${esc(label)}${curOperator?' · '+esc(curOperator):''}</span><span class="pts-empty" style="font-size:13px">剩余积分</span><span class="pts-value" style="color:${remain>=100?'var(--s-gold)':remain>=65?'var(--b-silver)':remain>=45?'var(--a-bronze)':'var(--text)'}">${fmt(remain)}</span>`;
+}
+
+// ===== RENDER GIFTS =====
+function renderGifts(){
+  const area=document.getElementById('giftArea');
+  if(!D.gifts.length){area.innerHTML='<div style="text-align:center;padding:48px;color:var(--text3)">暂无礼物</div>';return}
+
+  const streamerPts = curStreamer ? (()=>{const s=D.streamers.find(x=>x.id===curStreamer);return s?s.totalPts-s.usedPts:0})() : 0;
+
+  // Group by tier
+  const tiers={s:[],b:[],a:[]};
+  D.gifts.forEach(g=>{(tiers[g.tier]||tiers.a).push(g)});
+
+  const tierOrder=['s','b','a'];
+  let html='';
+  tierOrder.forEach(tk=>{
+    const gifts=tiers[tk];if(!gifts||!gifts.length)return;
+    const t=TIERS[tk];
+    const cards=gifts.map((g,idx)=>{
+      const r=remain(g),sold=r<=0;
+      const locked = streamerPts < g.cost;
+      const cls = sold?'sold-out':(locked&&curStreamer?'sold-out':'');
+      return`
+      <div class="gift-card ${cls}" style="animation-delay:${idx*0.04}s">
+        <div class="gift-icon">${g.emoji||'🎁'}</div>
+        <div class="gift-body">
+          <div class="gift-name">${esc(g.name)}</div>
+          <div class="gift-meta">
+            <span>需 ${fmt(g.cost)} 积分</span>
+          </div>
+        </div>
+        <div class="gift-stock${r<=g.total*.2?' low':''}">
+          ${sold?'已兑完':locked&&curStreamer?'积分不足':`剩 ${r}/${g.total}`}
+        </div>
+      </div>`;
+    }).join('');
+    html+=`
+    <div class="tier-section">
+      <div class="tier-header">
+        <span class="tier-badge ${t.badge}">${t.label}</span>
+        <span style="margin:0 6px;color:var(--ks-rule-strong)">|</span><span class="tier-threshold">≥${t.threshold} 积分可兑换</span>
+        ${curStreamer?`<span style="margin-left:auto;font-size:13px;color:${streamerPts>=t.threshold?'var(--accent-bright)':'var(--text3)'}">${streamerPts>=t.threshold?'✓ 已达标':'⚠ 未达标'}</span>`:''}
+      </div>
+      <div class="gift-grid">${cards}</div>
+    </div>`;
+  });
+  area.innerHTML=html;
+}
+
+
+
+// ===== ADMIN =====
+const ADMIN_PWD='flowerdance123';
+function openAdminAuth(){document.getElementById('adminAuthModal').style.display='flex';document.getElementById('adminPwd').value='';setTimeout(()=>document.getElementById('adminPwd').focus(),100)}
+function closeAdminAuth(){document.getElementById('adminAuthModal').style.display='none'}
+function checkAdminAuth(){if(document.getElementById('adminPwd').value===ADMIN_PWD){closeAdminAuth();document.getElementById('adminOverlay').style.display='block';document.body.style.overflow='hidden';renderAdminLists();switchAdminTab('gifts')}else{toast('密码错误','error')}}
+function closeAdmin(){document.getElementById('adminOverlay').style.display='none';document.body.style.overflow=''}
+
+function switchAdminTab(tab){
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.toggle('active',t.textContent.includes(tab==='gifts'?'礼物':tab==='records'?'兑换记录':tab==='streamers'?'主播':tab==='data'?'数据':'')));
+  ['gifts','records','streamers','data'].forEach(t=>document.getElementById('adminTab'+t.charAt(0).toUpperCase()+t.slice(1)).style.display=t===tab?'block':'none');
+  if(tab==='gifts')renderAdminLists();
+  if(tab==='records')renderRecords();
+  if(tab==='streamers')renderStreamers();
+}
+
+function populateGiftDropdown(){
+  const sel=document.getElementById('giftDropdown');
+  const curId=sel.value;
+  sel.innerHTML='<option value="">选择礼物</option>'+D.gifts.map(g=>{
+    const r=remain(g),sold=r<=0;
+    const label=`${g.emoji||''} ${g.name} - ${TIERS[g.tier].label} (${fmt(g.cost)}分)`;
+    const cls=sold?'sold-out':g.tier+'-tier';
+    return `<option value="${g.id}" class="${cls}" ${sold?'disabled':''}>${sold?'[已兑完] ':''}${label}</option>`;
+  }).join('');
+  if(curId){const opt=sel.querySelector(`option[value="${curId}"]`);if(opt&&!opt.disabled)sel.value=curId}
+}
+function onGiftDropdownChange(){}
+function quickRedeem(){
+  const gid=document.getElementById('giftDropdown').value;
+  const nm=document.getElementById('rdmName').value.trim();
+  const op=document.getElementById('operatorSelect').value;
+  if(!curStreamer){toast('请先查询主播积分','error');return}
+  if(!gid){toast('请选择礼物','error');return}
+  if(!nm){toast('请输入兑换人姓名','error');return}
+  if(!op){toast('请选择运营','error');return}
+  const g=D.gifts.find(x=>x.id===gid);
+  if(!g||remain(g)<=0){toast('库存不足','error');return}
+  const s=D.streamers.find(x=>x.id===curStreamer);
+  if(s.totalPts-s.usedPts<g.cost){toast('积分不足','error');return}
+  g.used++;s.usedPts+=g.cost;
+  D.records.unshift({id:uid(),giftId:g.id,giftName:g.name,streamerId:s.id,streamerName:s.name,redeemer:nm,operator:op,qty:1,ptsUsed:g.cost,ts:Date.now()});
+  save();render();toast(`${nm} 兑换 ${g.name} 成功`,'success');
+}
+
+function fmtTime(ts){const d=new Date(ts);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`}
+function renderRecords(){
+  const el=document.getElementById('recordsList');
+  if(!D.records||!D.records.length){el.innerHTML='<span style="color:var(--text3);font-size:13px">暂无兑换记录</span>';return}
+  el.innerHTML=D.records.slice(0,50).map((r,i)=>{
+    const isRollback=r.giftName&&r.giftName&&r.giftName.indexOf("回退")>=0;
+    if(isRollback) return `<div class="admin-item" style="background:#fff0f0;border-left:3px solid var(--coral)"><span>↩ ${esc(r.redeemer)} 回退 ${esc(r.giftName.replace('【回退】',''))}</span><span class="meta">${esc(r.streamerName)} · ${r.operator||'?'} · ${fmtTime(r.ts)}</span><span><button class="act-btn" style="color:var(--text3)" disabled>已退回</button></span></div>`
+    return `<div class="admin-item"><span>${esc(r.redeemer)} 兑换 ${esc(r.giftName)} ${r.qty>1?'×'+r.qty:''}</span><span class="meta">${esc(r.streamerName)} · ${r.operator||'?'} · ${fmtTime(r.ts)}</span><span><button class="act-btn" style="color:var(--coral)" onclick="rollbackRecord('${r.id}')">回退</button></span></div>`}).join('');
+}
+function rollbackRecord(id){
+  try{
+    const rec=D.records.find(r=>r.id===id);
+    if(!rec){toast('记录不存在','error');return}
+    if(rec.giftName&&rec.giftName&&rec.giftName.indexOf("回退")>=0){toast('已经是回退记录','error');return}
+    var nm=rec.redeemer||'未知';
+    var gn=rec.giftName||'未知';
+    if(!confirm('回退「'+nm+'」兑换的「'+gn+'」？\n将恢复'+rec.ptsUsed+'积分和'+(rec.qty||1)+'件库存'))return;
+    if(rec.giftId){var g=D.gifts.find(x=>x.id===rec.giftId);if(g)g.used=Math.max(0,g.used-(rec.qty||1))}
+    if(rec.streamerId){var s=D.streamers.find(x=>x.id===rec.streamerId);if(s)s.usedPts=Math.max(0,s.usedPts-rec.ptsUsed)}
+    var newRec={id:uid(),giftId:rec.giftId||'',giftName:'【回退】'+rec.giftName,streamerId:rec.streamerId||'',streamerName:rec.streamerName||'',redeemer:rec.redeemer,operator:rec.operator||'',qty:-(rec.qty||1),ptsUsed:-rec.ptsUsed,ts:Date.now()};
+    D.records=D.records.filter(r=>r.id!==id);
+    D.records.unshift(newRec);
+    save();render();renderRecords();toast('已回退并返还积分库存');
+  }catch(e){toast('回退出错:'+e.message,'error')}
+}
+
+function renderStreamers(){
+  const el=document.getElementById('streamerList');
+  if(!el)return;
+  el.innerHTML=D.streamers.map(s=>`<div class="admin-item"><span>👤 ${esc(s.name)} ${s.realName?'('+esc(s.realName)+')':''}</span><span class="meta">剩余${fmt(s.totalPts-s.usedPts)} / 累计${fmt(s.totalPts)} · 已用${fmt(s.usedPts)}${s.operator?' · '+esc(s.operator):''}</span><span><button class="act-btn" onclick="editStr('${s.id}')">编辑</button><button class="act-btn" style="color:#ff9e9e" onclick="delStr('${s.id}')">删除</button></span></div>`).join('');
+}
+
+function renderAdminLists(){
+try{
+
+  const gl=document.getElementById('giftList');if(gl)gl.innerHTML=D.gifts.map(g=>`
+<div class="admin-item" style="flex-direction:column;align-items:flex-start;gap:4px">
+      <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+        <span style="font-weight:600">${g.emoji||'🎁'} ${esc(g.name)} <span style="font-weight:400;font-size:11px;color:var(--text3)">${TIERS[g.tier].label}</span></span>
+        <span style="font-size:12px;color:var(--text);white-space:nowrap">${fmt(g.cost)}积分 · 剩${remain(g)}/${g.total}</span>
+      </div>
+      <div style="display:flex;gap:4px"><button class="act-btn" onclick="editGift('${g.id}')">编辑</button><button class="act-btn" style="color:var(--coral)" onclick="delGift('${g.id}')">删除</button></div>
+    </div>
+`).join('');
+  renderStreamers();
+
+}catch(e){toast('renderAdminLists出错:'+e.message,'error');console.error('renderAdminLists',e);}
+}
+
+function addGift(){
+try{
+
+  const nm=document.getElementById('gName').value.trim(),em=document.getElementById('gEmoji').value.trim();
+  const q=parseInt(document.getElementById('gQty').value),tier=document.getElementById('gTier').value;
+  const cost=parseInt(document.getElementById('gCost')?.value)||TIERS[tier].threshold;
+  if(!nm||q<1||cost<1){toast('请完整填写','error');return}
+  D.gifts.push({id:uid(),name:nm,emoji:em||'🎁',total:q,used:0,cost,tier});
+  save();render();renderAdminLists();toast(`已添加 ${nm}`);
+  document.getElementById('gName').value='';document.getElementById('gEmoji').value='';document.getElementById('gQty').value='1';document.getElementById('gCost').value='100';
+
+}catch(e){toast('addGift出错:'+e.message,'error');console.error('addGift',e);}
+}
+
+function editGift(id){
+  const g=D.gifts.find(x=>x.id===id);if(!g)return;
+  document.getElementById('giftAddRow').innerHTML=`
+    <input class="wide" id="egName" value="${esc(g.name)}">
+    <input class="tiny" id="egEmoji" value="${g.emoji||'🎁'}" maxlength="4">
+    <input class="tiny" id="egCost" type="number" value="${g.cost}" min="1">
+    <input class="tiny" id="egQty" type="number" value="${g.total}" min="${g.used}">
+    <select class="mid" id="egTier" style="height:36px;background:var(--cream);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;padding:0 8px">
+      <option value="s"${g.tier==='s'?' selected':''}>S级 ≥100分</option>
+      <option value="b"${g.tier==='b'?' selected':''}>B级 ≥65分</option>
+      <option value="a"${g.tier==='a'?' selected':''}>A级 ≥45分</option>
+    </select>
+    <button class="btn btn-primary btn-small" onclick="saveGift('${id}')">保存</button>
+    <button class="btn btn-ghost btn-small" onclick="cancelGiftEdit()">取消</button>`;
+}
+
+function saveGift(id){
+  const g=D.gifts.find(x=>x.id===id);if(!g)return;
+  g.name=document.getElementById('egName').value.trim();
+  g.emoji=document.getElementById('egEmoji')?.value.trim()||g.emoji||'🎁';
+  g.total=parseInt(document.getElementById('egQty').value);
+  g.tier=document.getElementById('egTier').value;
+  g.cost=parseInt(document.getElementById('egCost')?.value)||g.cost;
+  if(g.total<g.used){toast(`不能小于已兑(${g.used})`,'error');return}
+  if(!g.name){toast('请完整填写','error');return}
+  save();cancelGiftEdit();render();renderAdminLists();toast('已保存');
+}
+
+function cancelGiftEdit(){
+  document.getElementById('giftAddRow').innerHTML=`
+    <input class="wide" id="gName" placeholder="名称">
+    <input class="tiny" id="gEmoji" placeholder="🎁" maxlength="4">
+    <input class="tiny" id="gCost" type="number" placeholder="积分" value="100" min="1">
+    <input class="tiny" id="gQty" type="number" value="1" min="1">
+    <select class="mid" id="gTier" style="height:36px;background:var(--cream);border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);outline:none;padding:0 8px">
+      <option value="s">S级 ≥100分</option><option value="b">B级 ≥65分</option><option value="a">A级 ≥45分</option>
+    </select>
+    <button class="btn btn-primary btn-small" onclick="addGift()">+ 添加</button>`;
+}
+
+function delGift(id){
+  try{
+    const g=D.gifts.find(x=>x.id===id);
+    if(!g){toast('礼物不存在','error');return}
+    if(g.used>0){toast('有兑换记录，无法删除','error');return}
+    if(!confirm('删除「'+g.name+'」？'))return;
+    D.gifts=D.gifts.filter(x=>x.id!==id);
+    save();render();renderAdminLists();toast('已删除');
+  }catch(e){toast('删除出错:'+e.message,'error')}
+}
+
+function addStreamer(){
+  const nm=document.getElementById('sName').value.trim(),rn=(document.getElementById('sRealName')||{}).value?.trim()||'';
+  const p=parseInt(document.getElementById('sPts').value),op=(document.getElementById('sOperator')||{}).value||'';
+  if(!nm||isNaN(p)||p<0){toast('请完整填写','error');return}
+  D.streamers.push({id:uid(),name:nm,realName:rn,operator:op,totalPts:p,usedPts:0});
+  save();render();toast(`已添加 ${nm}`);
+  document.getElementById('sName').value='';if(document.getElementById('sRealName'))document.getElementById('sRealName').value='';document.getElementById('sPts').value='';
+}
+
+function editStr(id){
+  const s=D.streamers.find(x=>x.id===id);if(!s)return;
+  const nm=prompt('昵称',s.name);if(nm===null)return;
+  const rn=prompt('实名（选填）',s.realName||'');if(rn===null)return;
+  const op=prompt('运营',s.operator||'');if(op===null)return;
+  const tp=parseInt(prompt('累计积分',s.totalPts));if(isNaN(tp)||tp<0)return;
+  const up=parseInt(prompt('已使用积分',s.usedPts));if(isNaN(up)||up<0||up>tp)return;
+  s.name=nm;s.realName=rn;s.operator=op;s.totalPts=tp;s.usedPts=up;save();render();
+}
+
+function delStr(id){
+  if(D.records.some(r=>r.streamerId===id)){toast('有兑换记录','error');return}
+  if(!confirm('确定删除？'))return;
+  D.streamers=D.streamers.filter(x=>x.id!==id);save();
+  if(curStreamer===id){curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').value=''}
+  render();
+}
+
+function exportData(){
+  const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download=`star-gift-${new Date().toISOString().slice(0,10)}.json`;a.click();
+  URL.revokeObjectURL(a.href);toast('已导出');
+}
+
+function importData(e){
+  const f=e.target.files[0];if(!f)return;
+  new FileReader().addEventListener('load',ev=>{
+    try{const d=JSON.parse(ev.target.result);if(!d.gifts||!d.streamers)throw 0;
+    if(!confirm('导入覆盖当前数据？'))return;
+    D=d;save();curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').value='';render();toast('已导入')}catch(x){toast('格式错误','error')}
+  }).readAsText(f);e.target.value='';
+}
+
+function resetAll(){
+  if(!confirm('重置清空所有数据？'))return;
+  D=JSON.parse(JSON.stringify(DEF));save();curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').value='';render();
+}
+
+
+function render(){
+  renderPoints();renderGifts();populateGiftDropdown();
+}
+render();
+</script>
+</body>
+</html>
