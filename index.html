@@ -289,6 +289,15 @@ body{
 .site-footer .footer-title{font-family:'Rubik','PingFang SC',sans-serif;font-size:15px;font-weight:700;color:var(--ocean-900);margin-bottom:4px}
 .site-footer .footer-sub{font-size:12px;color:var(--text3)}
 
+/* Custom Dialog (replaces native confirm/prompt hidden behind admin overlay) */
+.custom-dialog-overlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.custom-dialog-box{background:var(--card);border-radius:16px;padding:28px 24px;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center}
+.custom-dialog-msg{font-size:15px;color:var(--text);line-height:1.6;margin-bottom:20px;white-space:pre-line}
+.custom-dialog-input{width:100%;padding:10px 14px;margin-bottom:16px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;color:var(--text);background:var(--cream);outline:none;text-align:center}
+.custom-dialog-input:focus{border-color:var(--ocean-400);box-shadow:0 0 0 3px rgba(0,180,216,.15)}
+.custom-dialog-btns{display:flex;gap:10px;justify-content:center}
+.custom-dialog-btns button{min-width:90px}
+
 @media(max-width:600px){
   .hero{padding:36px 0 24px}
   .hero-kicker{font-size:11px}
@@ -502,7 +511,11 @@ body{
 
 <script>
 // ===== GLOBAL ERROR HANDLER =====
-window.onerror=function(msg){console.error("JS error:",msg);return false;};
+window.onerror=function(msg,src,line,col,err){
+  console.error("JS error:",msg,"line",line);
+  try{var t=document.getElementById('toasts');if(t){var e=document.createElement('div');e.className='toast-msg error';e.textContent='错误:'+String(msg).slice(0,80);e.style.fontSize='12px';t.appendChild(e);setTimeout(function(){e.remove()},6000)}}catch(ign){}
+  return false;
+};
 
 // ========== REAL GIFT DATA ==========
 const TIERS = {s:{label:'S级奖励',badge:'s',threshold:100,color:'var(--s-gold)'},b:{label:'B级奖励',badge:'b',threshold:65,color:'var(--b-silver)'},a:{label:'≥45分',badge:'a',threshold:45,color:'var(--a-bronze)'}};
@@ -608,7 +621,7 @@ const DEF={
 
 const KEY='gx_star_v5';
 let D=(()=>{try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}return JSON.parse(JSON.stringify(DEF))})();
-function save(){localStorage.setItem(KEY,JSON.stringify(D))}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('保存失败：存储空间不足，请清理旧数据','error');console.error(e)}}
 if(!localStorage.getItem(KEY))save();
 
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
@@ -616,6 +629,37 @@ const fmt=n=>n.toLocaleString('zh-CN');
 const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML};
 const remain=g=>g.total-g.used;
 let curStreamer=null,curOperator='';
+
+// ===== Custom Dialog (replaces native confirm/prompt) =====
+var _dialogCb=null;
+function showConfirm(msg,ok,cancel){
+  document.getElementById('customDialogMsg').textContent=msg;
+  document.getElementById('customDialogInput').style.display='none';
+  document.getElementById('customDialog').style.display='flex';
+  _dialogCb=ok;
+  document.getElementById('customDialogOk').onclick=function(){
+    document.getElementById('customDialog').style.display='none';
+    if(_dialogCb)_dialogCb();
+  };
+  document.getElementById('customDialogCancel').onclick=function(){
+    document.getElementById('customDialog').style.display='none';
+    if(cancel)cancel();
+  };
+}
+function showPrompt(msg,defVal,ok){
+  document.getElementById('customDialogMsg').textContent=msg;
+  var inp=document.getElementById('customDialogInput');
+  inp.style.display='block';inp.value=defVal||'';
+  document.getElementById('customDialog').style.display='flex';
+  document.getElementById('customDialogOk').onclick=function(){
+    document.getElementById('customDialog').style.display='none';
+    if(ok)ok(inp.value.trim());
+  };
+  document.getElementById('customDialogCancel').onclick=function(){
+    document.getElementById('customDialog').style.display='none';
+  };
+  setTimeout(function(){inp.focus();inp.select()},100);
+}
 
 function toast(msg,type='success'){
   const r=document.getElementById('toasts');const e=document.createElement('div');
@@ -679,7 +723,7 @@ function renderGifts(){
       const cls = sold?'sold-out':(locked&&curStreamer?'sold-out':'');
       return`
       <div class="gift-card ${cls}" style="animation-delay:${idx*0.04}s">
-        <div class="gift-icon">${g.emoji||'🎁'}</div>
+        <div class="gift-icon">${esc(g.emoji||'🎁')}</div>
         <div class="gift-body">
           <div class="gift-name">${esc(g.name)}</div>
           <div class="gift-meta">
@@ -726,11 +770,11 @@ function populateGiftDropdown(){
   const curId=sel.value;
   sel.innerHTML='<option value="">选择礼物</option>'+D.gifts.map(g=>{
     const r=remain(g),sold=r<=0;
-    const label=`${g.emoji||''} ${g.name} - ${TIERS[g.tier].label} (${fmt(g.cost)}分)`;
+    const label=esc(g.emoji||'')+' '+esc(g.name)+' - '+esc(TIERS[g.tier].label)+' ('+fmt(g.cost)+'分)';
     const cls=sold?'sold-out':g.tier+'-tier';
-    return `<option value="${g.id}" class="${cls}" ${sold?'disabled':''}>${sold?'[已兑完] ':''}${label}</option>`;
+    return '<option value="'+g.id+'" class="'+cls+'" '+(sold?'disabled':'')+'>'+(sold?'[已兑完] ':'')+label+'</option>';
   }).join('');
-  if(curId){const opt=sel.querySelector(`option[value="${curId}"]`);if(opt&&!opt.disabled)sel.value=curId}
+  if(curId){const opt=sel.querySelector('option[value="'+curId+'"]');if(opt&&!opt.disabled)sel.value=curId}
 }
 function onGiftDropdownChange(){}
 function quickRedeem(){
@@ -766,13 +810,14 @@ function rollbackRecord(id){
     if(rec.giftName&&rec.giftName&&rec.giftName.indexOf("回退")>=0){toast('已经是回退记录','error');return}
     var nm=rec.redeemer||'未知';
     var gn=rec.giftName||'未知';
-    if(!confirm('回退「'+nm+'」兑换的「'+gn+'」？\n将恢复'+rec.ptsUsed+'积分和'+(rec.qty||1)+'件库存'))return;
-    if(rec.giftId){var g=D.gifts.find(x=>x.id===rec.giftId);if(g)g.used=Math.max(0,g.used-(rec.qty||1))}
-    if(rec.streamerId){var s=D.streamers.find(x=>x.id===rec.streamerId);if(s)s.usedPts=Math.max(0,s.usedPts-rec.ptsUsed)}
-    var newRec={id:uid(),giftId:rec.giftId||'',giftName:'【回退】'+rec.giftName,streamerId:rec.streamerId||'',streamerName:rec.streamerName||'',redeemer:rec.redeemer,operator:rec.operator||'',qty:-(rec.qty||1),ptsUsed:-rec.ptsUsed,ts:Date.now()};
-    D.records=D.records.filter(r=>r.id!==id);
-    D.records.unshift(newRec);
-    save();render();renderRecords();toast('已回退并返还积分库存');
+    showConfirm('回退「'+nm+'」兑换的「'+gn+'」？\n将恢复'+rec.ptsUsed+'积分和'+(rec.qty||1)+'件库存',function(){
+      if(rec.giftId){var g=D.gifts.find(x=>x.id===rec.giftId);if(g)g.used=Math.max(0,g.used-(rec.qty||1))}
+      if(rec.streamerId){var s=D.streamers.find(x=>x.id===rec.streamerId);if(s)s.usedPts=Math.max(0,s.usedPts-rec.ptsUsed)}
+      var newRec={id:uid(),giftId:rec.giftId||'',giftName:'【回退】'+rec.giftName,streamerId:rec.streamerId||'',streamerName:rec.streamerName||'',redeemer:rec.redeemer,operator:rec.operator||'',qty:-(rec.qty||1),ptsUsed:-rec.ptsUsed,ts:Date.now()};
+      D.records=D.records.filter(r=>r.id!==id);
+      D.records.unshift(newRec);
+      save();render();renderRecords();toast('已回退并返还积分库存');
+    });
   }catch(e){toast('回退出错:'+e.message,'error')}
 }
 
@@ -788,7 +833,7 @@ try{
   const gl=document.getElementById('giftList');if(gl)gl.innerHTML=D.gifts.map(g=>`
 <div class="admin-item" style="flex-direction:column;align-items:flex-start;gap:4px">
       <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
-        <span style="font-weight:600">${g.emoji||'🎁'} ${esc(g.name)} <span style="font-weight:400;font-size:11px;color:var(--text3)">${TIERS[g.tier].label}</span></span>
+        <span style="font-weight:600">${esc(g.emoji||'🎁')} ${esc(g.name)} <span style="font-weight:400;font-size:11px;color:var(--text3)">${TIERS[g.tier].label}</span></span>
         <span style="font-size:12px;color:var(--text);white-space:nowrap">${fmt(g.cost)}积分 · 剩${remain(g)}/${g.total}</span>
       </div>
       <div style="display:flex;gap:4px"><button class="act-btn" onclick="editGift('${g.id}')">编辑</button><button class="act-btn" style="color:var(--coral)" onclick="delGift('${g.id}')">删除</button></div>
@@ -804,7 +849,8 @@ try{
 
   const nm=document.getElementById('gName').value.trim(),em=document.getElementById('gEmoji').value.trim();
   const q=parseInt(document.getElementById('gQty').value),tier=document.getElementById('gTier').value;
-  const cost=parseInt(document.getElementById('gCost')?.value)||TIERS[tier].threshold;
+  const rawCost=parseInt(document.getElementById('gCost')?.value);
+  const cost=isNaN(rawCost)?(TIERS[tier]&&TIERS[tier].threshold)||100:rawCost;
   if(!nm||q<1||cost<1){toast('请完整填写','error');return}
   D.gifts.push({id:uid(),name:nm,emoji:em||'🎁',total:q,used:0,cost,tier});
   save();render();renderAdminLists();toast(`已添加 ${nm}`);
@@ -817,7 +863,7 @@ function editGift(id){
   const g=D.gifts.find(x=>x.id===id);if(!g)return;
   document.getElementById('giftAddRow').innerHTML=`
     <input class="wide" id="egName" value="${esc(g.name)}">
-    <input class="tiny" id="egEmoji" value="${g.emoji||'🎁'}" maxlength="4">
+    <input class="tiny" id="egEmoji" value="${esc(g.emoji||'🎁')}" maxlength="4">
     <input class="tiny" id="egCost" type="number" value="${g.cost}" min="1">
     <input class="tiny" id="egQty" type="number" value="${g.total}" min="${g.used}">
     <select class="mid" id="egTier" style="height:36px;background:var(--cream);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;padding:0 8px">
@@ -830,15 +876,20 @@ function editGift(id){
 }
 
 function saveGift(id){
-  const g=D.gifts.find(x=>x.id===id);if(!g)return;
-  g.name=document.getElementById('egName').value.trim();
-  g.emoji=document.getElementById('egEmoji')?.value.trim()||g.emoji||'🎁';
-  g.total=parseInt(document.getElementById('egQty').value);
-  g.tier=document.getElementById('egTier').value;
-  g.cost=parseInt(document.getElementById('egCost')?.value)||g.cost;
-  if(g.total<g.used){toast(`不能小于已兑(${g.used})`,'error');return}
-  if(!g.name){toast('请完整填写','error');return}
-  save();cancelGiftEdit();render();renderAdminLists();toast('已保存');
+  try{
+    const g=D.gifts.find(x=>x.id===id);if(!g)return;
+    const nEl=document.getElementById('egName'),eEl=document.getElementById('egEmoji'),qEl=document.getElementById('egQty'),tEl=document.getElementById('egTier'),cEl=document.getElementById('egCost');
+    if(!nEl||!qEl||!tEl){toast('表单异常，请刷新重试','error');return}
+    g.name=nEl.value.trim();
+    g.emoji=(eEl&&eEl.value.trim())||g.emoji||'🎁';
+    const newQ=parseInt(qEl.value);if(isNaN(newQ)||newQ<1)return;
+    g.total=newQ;
+    g.tier=tEl.value;
+    const rawC=parseInt(cEl&&cEl.value);g.cost=isNaN(rawC)?g.cost:rawC;
+    if(g.total<g.used){toast('不能小于已兑('+g.used+')','error');return}
+    if(!g.name){toast('请完整填写','error');return}
+    save();cancelGiftEdit();render();renderAdminLists();toast('已保存');
+  }catch(e){toast('保存出错:'+e.message,'error');console.error(e)}
 }
 
 function cancelGiftEdit(){
@@ -858,9 +909,10 @@ function delGift(id){
     const g=D.gifts.find(x=>x.id===id);
     if(!g){toast('礼物不存在','error');return}
     if(g.used>0){toast('有兑换记录，无法删除','error');return}
-    if(!confirm('删除「'+g.name+'」？'))return;
-    D.gifts=D.gifts.filter(x=>x.id!==id);
-    save();render();renderAdminLists();toast('已删除');
+    showConfirm('删除「'+g.name+'」？',function(){
+      D.gifts=D.gifts.filter(x=>x.id!==id);
+      save();render();renderAdminLists();toast('已删除');
+    });
   }catch(e){toast('删除出错:'+e.message,'error')}
 }
 
@@ -874,21 +926,33 @@ function addStreamer(){
 }
 
 function editStr(id){
-  const s=D.streamers.find(x=>x.id===id);if(!s)return;
-  const nm=prompt('昵称',s.name);if(nm===null)return;
-  const rn=prompt('实名（选填）',s.realName||'');if(rn===null)return;
-  const op=prompt('运营',s.operator||'');if(op===null)return;
-  const tp=parseInt(prompt('累计积分',s.totalPts));if(isNaN(tp)||tp<0)return;
-  const up=parseInt(prompt('已使用积分',s.usedPts));if(isNaN(up)||up<0||up>tp)return;
-  s.name=nm;s.realName=rn;s.operator=op;s.totalPts=tp;s.usedPts=up;save();render();
+  var s=D.streamers.find(function(x){return x.id===id});if(!s)return;
+  var nm2=null,rn2=null,op2=null,tp2=null;
+  showPrompt('昵称',s.name,function(v){
+    if(!v)return;nm2=v;
+    showPrompt('实名（选填）',s.realName||'',function(v){
+      rn2=v||'';
+      showPrompt('运营',s.operator||'',function(v){
+        op2=v||'';
+        showPrompt('累计积分',String(s.totalPts),function(v){
+          var tp=parseInt(v);if(isNaN(tp)||tp<0)return;tp2=tp;
+          showPrompt('已使用积分',String(s.usedPts),function(v){
+            var up=parseInt(v);if(isNaN(up)||up<0||up>tp2)return;
+            s.name=nm2;s.realName=rn2;s.operator=op2;s.totalPts=tp2;s.usedPts=up;save();render();
+          });
+        });
+      });
+    });
+  });
 }
 
 function delStr(id){
-  if(D.records.some(r=>r.streamerId===id)){toast('有兑换记录','error');return}
-  if(!confirm('确定删除？'))return;
-  D.streamers=D.streamers.filter(x=>x.id!==id);save();
-  if(curStreamer===id){curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').value=''}
-  render();
+  if(D.records&&D.records.some(r=>r.streamerId===id)){toast('有兑换记录','error');return}
+  showConfirm('确定删除？',function(){
+    D.streamers=D.streamers.filter(x=>x.id!==id);save();
+    if(curStreamer===id){curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').value=''}
+    render();
+  });
 }
 
 function exportData(){
@@ -902,14 +966,16 @@ function importData(e){
   const f=e.target.files[0];if(!f)return;
   new FileReader().addEventListener('load',ev=>{
     try{const d=JSON.parse(ev.target.result);if(!d.gifts||!d.streamers)throw 0;
-    if(!confirm('导入覆盖当前数据？'))return;
-    D=d;save();curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').value='';render();toast('已导入')}catch(x){toast('格式错误','error')}
+    showConfirm('导入覆盖当前数据？',function(){
+      D=d;save();curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').value='';render();toast('已导入');
+    })}catch(x){toast('格式错误','error')}
   }).readAsText(f);e.target.value='';
 }
 
 function resetAll(){
-  if(!confirm('重置清空所有数据？'))return;
-  D=JSON.parse(JSON.stringify(DEF));save();curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').value='';render();
+  showConfirm('重置清空所有数据？',function(){
+    D=JSON.parse(JSON.stringify(DEF));save();curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').value='';render();
+  });
 }
 
 
@@ -918,5 +984,16 @@ function render(){
 }
 render();
 </script>
+<!-- Custom Confirm/Prompt Dialog -->
+<div class="custom-dialog-overlay" id="customDialog" style="display:none">
+  <div class="custom-dialog-box">
+    <div class="custom-dialog-msg" id="customDialogMsg"></div>
+    <input type="text" class="custom-dialog-input" id="customDialogInput" style="display:none">
+    <div class="custom-dialog-btns">
+      <button class="btn btn-ghost btn-small" id="customDialogCancel">取消</button>
+      <button class="btn btn-primary btn-small" id="customDialogOk">确认</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
