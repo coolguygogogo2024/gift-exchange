@@ -296,7 +296,7 @@ input[type=number]{-moz-appearance:textfield}
   .wrap{padding:0 16px}
 }
 </style>
-  <script src="https://imgcache.qq.com/qcloud/cloudbase-js-sdk/1.7.1/cloudbase.full.js"></script>
+  <script src="https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js"></script>
 </head>
 <body>
 <div class="aurora-bg"></div>
@@ -468,6 +468,80 @@ window.onerror=function(msg,src,line,col,err){
   try{var t=document.getElementById('toasts');if(t){var e=document.createElement('div');e.className='toast-msg error';e.textContent='错误:'+String(msg).slice(0,80);e.style.fontSize='12px';t.appendChild(e);setTimeout(function(){e.remove()},6000)}}catch(ign){}
   return false;
 };
+
+// ===== CLOUDBASE INIT =====
+var TCB_ENV='ostgift-d0gim6ky878a7cd69';
+var tcbReady=false;
+var tcbDb=null;
+var tcb_=null;
+(function initCB(){
+  try{
+    var app=cloudbase.init({env:TCB_ENV,region:'ap-shanghai'});
+    tcbDb=app.database();
+    tcb_=tcbDb.command;
+    var auth=app.auth();
+    auth.signInAnonymously().then(function(){
+      tcbReady=true;
+      console.log('[CloudBase] \u2713 Connected v3');
+      loadCloudAndSync();
+      setupRealtime();
+    }).catch(function(e){
+      console.warn('[CloudBase] Auth failed:',e.message);
+    });
+  }catch(e){
+    console.warn('[CloudBase] Init failed:',e.message);
+  }
+})();
+
+async function loadCloudAndSync(){
+  if(!tcbReady) return;
+  try{
+    var _a=await Promise.all([
+      tcbDb.collection('gifts').get(),
+      tcbDb.collection('streamers').get(),
+      tcbDb.collection('records').orderBy('ts','desc').limit(500).get()
+    ]);
+    var gData=_a[0].data||[],sData=_a[1].data||[],rData=_a[2].data||[];
+    if(gData.length>0&&sData.length>0){
+      D.gifts=gData;
+      D.streamers=sData;
+      D.records=rData;
+      save();
+      console.log('[CloudBase] Loaded: '+gData.length+' gifts, '+sData.length+' streamers, '+rData.length+' records');
+    }else{
+      console.log('[CloudBase] Empty data, keeping local');
+    }
+  }catch(e){
+    console.error('[CloudBase] Load error:',e);
+  }
+  render();
+}
+
+function setupRealtime(){
+  if(!tcbReady) return;
+  var timer=null;
+  function debouncedSync(){
+    if(timer) return;
+    timer=setTimeout(function(){timer=null;loadCloudAndSync();},500);
+  }
+  try{
+    tcbDb.collection('gifts').watch({onChange:debouncedSync,onError:function(e){console.warn('[Watch] gifts err:',e)}});
+    tcbDb.collection('streamers').watch({onChange:debouncedSync,onError:function(e){console.warn('[Watch] streamers err:',e)}});
+    tcbDb.collection('records').watch({onChange:debouncedSync,onError:function(e){console.warn('[Watch] records err:',e)}});
+    console.log('[CloudBase] \u2713 Real-time watchers active');
+  }catch(e){
+    console.warn('[CloudBase] Watch not supported, using polling');
+    setInterval(function(){
+      if(tcbReady) loadCloudAndSync();
+    },3000);
+  }
+}
+
+// ======== WARNER FOR CLOUDBASE WRITE ========
+function _checkTcb(){
+  if(!tcbReady){toast('\u4e91\u6570\u636e\u5e93\u672a\u8fde\u63a5\uff0c\u5c06\u4ec5\u4fdd\u5b58\u5230\u672c\u5730\uff0c\u8bf7\u5237\u65b0\u91cd\u8bd5','error');return false;}
+  return true;
+}
 
 // ========== REAL GIFT DATA ==========
 const TIERS = {s:{label:'S级别奖励',badge:'s',threshold:100,color:'var(--s-gold)'},a:{label:'A级奖励',badge:'a',threshold:65,color:'var(--b-silver)'},b:{label:'B级奖励',badge:'b',threshold:45,color:'var(--a-bronze)'}};
@@ -744,28 +818,56 @@ function populateGiftDropdown(){
 function onGiftDropdownChange(){}
 function quickRedeem(){doRedeem()}
 async function doRedeem(){
-  const gid=document.getElementById('giftDropdown').value;
-  const nm=document.getElementById('rdmName').value.trim();
-  const op=document.getElementById('operatorSelect').textContent;
-  if(!curStreamer){toast('请先查询主播积分','error');return}
-  if(!gid){toast('请选择礼物','error');return}
-  if(!nm){toast('请输入兑换人姓名','error');return}
-  if(!op){toast('请选择运营','error');return}
-  const g=D.gifts.find(x=>x.id===gid);
-  if(!g||remain(g)<=0){toast('库存不足','error');return}
-  const s=D.streamers.find(x=>x.id===curStreamer);
-  if(s.totalPts-s.usedPts<g.cost){toast('积分不足','error');return}
-  // CloudBase atomic stock update
-  if(tcbReady){
+  var gid=document.getElementById('giftDropdown').value;
+  var nm=document.getElementById('rdmName').value.trim();
+  var op=document.getElementById('operatorSelect').textContent;
+  if(!curStreamer){toast('\u8bf7\u5148\u67e5\u8be2\u4e3b\u64ad\u79ef\u5206','error');return}
+  if(!gid){toast('\u8bf7\u9009\u62e9\u793c\u7269','error');return}
+  if(!nm){toast('\u8bf7\u8f93\u5165\u5151\u6362\u4eba\u59d3\u540d','error');return}
+  if(!op){toast('\u8bf7\u9009\u62e9\u8fd0\u8425','error');return}
+  var g=D.gifts.find(function(x){return x.id===gid;});
+  if(!g){toast('\u793c\u7269\u4e0d\u5b58\u5728','error');return}
+  var s=D.streamers.find(function(x){return x.id===curStreamer;});
+  if(!s){toast('\u4e3b\u64ad\u4e0d\u5b58\u5728','error');return}
+  if(s.totalPts-s.usedPts<g.cost){toast('\u79ef\u5206\u4e0d\u8db3\u9700'+g.cost,'error');return}
+
+  // Real-time CloudBase stock check
+  if(tcbReady&&tcb_){
     try{
-      const cloudRes=await tcbDb.collection('gifts').doc(g.id).update({$inc:{used:1}});
-      if(!(cloudRes.updated>0)){toast('该礼物已被抢完，请刷新后重试','error');return}
-    }catch(e){console.error('cloud redeem err',e);toast('网络异常，请稍后重试','error');return}
+      var freshG=await tcbDb.collection('gifts').doc(g._id||g.id).get();
+      var fg=freshG&&freshG.data?freshG.data:null;
+      if(fg){
+        var stockLeft=fg.total-fg.used;
+        if(stockLeft<=0){
+          toast('\u5b9e\u65f6\u5e93\u5b58\u5df2\u7a7a\uff0c\u8bf7\u5237\u65b0','error');
+          return;
+        }
+        // Atomic increment
+        var stockRes=await tcbDb.collection('gifts').doc(g._id||g.id).update({used:tcb_.inc(1)});
+        if(stockRes&&stockRes.updated>0){
+          await tcbDb.collection('streamers').doc(s._id||s.id).update({usedPts:tcb_.inc(g.cost)});
+          var rec={giftId:g.id,giftName:g.name,streamerId:s.id,streamerName:s.name,redeemer:nm,operator:op,qty:1,ptsUsed:g.cost,ts:Date.now()};
+          var addRes=await tcbDb.collection('records').add(rec);
+          rec.id=addRes._id||addRes.id||uid();rec._id=rec.id;
+          D.records.unshift(rec);
+          g.used=fg.used+1;s.usedPts+=g.cost;
+          console.log('[Redeem] CloudBase OK, stock:',g.used,'/',g.total);
+          save();render();
+          toast(nm+'\u5151\u6362'+g.name+'\u6210\u529f\u2601\ufe0f','success');
+          return;
+        }
+      }
+    }catch(e){
+      console.warn('[Redeem] CloudBase err, fallback local:',e.message);
+    }
   }
+  // Local fallback
+  if(remain(g)<=0){toast('\u5e93\u5b58\u4e0d\u8db3','error');return}
   g.used++;s.usedPts+=g.cost;
-  const rec={id:uid(),giftId:g.id,giftName:g.name,streamerId:s.id,streamerName:s.name,redeemer:nm,operator:op,qty:1,ptsUsed:g.cost,ts:Date.now()};if(tcbReady){try{tcbDb.collection("records").add(rec).catch(()=>{})}catch(e){}}
+  var rec={id:uid(),giftId:g.id,giftName:g.name,streamerId:s.id,streamerName:s.name,redeemer:nm,operator:op,qty:1,ptsUsed:g.cost,ts:Date.now()};
   D.records.unshift(rec);
-  save();render();toast(`${nm} 兑换 ${g.name} 成功`,'success');
+  save();render();
+  toast(nm+'\u5151\u6362'+g.name+'\u6210\u529f\u672c\u5730','success');
 }
 
 function fmtTime(ts){const d=new Date(ts);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`}
@@ -779,20 +881,48 @@ function renderRecords(){
 }
 function rollbackRecord(id){
   try{
-    const rec=D.records.find(r=>r.id===id);
-    if(!rec){toast('记录不存在','error');return}
-    if(rec.giftName&&rec.giftName&&rec.giftName.indexOf("回退")>=0){toast('已经是回退记录','error');return}
-    var nm=rec.redeemer||'未知';
-    var gn=rec.giftName||'未知';
-    showConfirm('回退「'+nm+'」兑换的「'+gn+'」？\n将恢复'+rec.ptsUsed+'积分和'+(rec.qty||1)+'件库存',function(){
-      if(rec.giftId){var g=D.gifts.find(x=>x.id===rec.giftId);if(g)g.used=Math.max(0,g.used-(rec.qty||1))}
-      if(rec.streamerId){var s=D.streamers.find(x=>x.id===rec.streamerId);if(s)s.usedPts=Math.max(0,s.usedPts-rec.ptsUsed)}
-      var newRec={id:uid(),giftId:rec.giftId||'',giftName:'【回退】'+rec.giftName,streamerId:rec.streamerId||'',streamerName:rec.streamerName||'',redeemer:rec.redeemer,operator:rec.operator||'',qty:-(rec.qty||1),ptsUsed:-rec.ptsUsed,ts:Date.now()};
-      D.records=D.records.filter(r=>r.id!==id);
-      D.records.unshift(newRec);
-      save();render();renderRecords();toast('已回退并返还积分库存');
+    var rec=D.records.find(function(r){return r.id===id||r._id===id;});
+    if(!rec){toast('\u8bb0\u5f55\u4e0d\u5b58\u5728','error');return}
+    if(rec.giftName&&rec.giftName.indexOf('\u56de\u9000')>=0){toast('\u5df2\u7ecf\u662f\u56de\u9000\u8bb0\u5f55','error');return}
+    var nm=rec.redeemer||'\u672a\u77e5';
+    var gn=rec.giftName||'\u672a\u77e5';
+    showConfirm('\u56de\u9000\u300c'+nm+'\u300d\u5151\u6362\u7684\u300c'+gn+'\u300d\uff1f\n\u5c06\u6062\u590d'+rec.ptsUsed+'\u79ef\u5206\u548c'+(rec.qty||1)+'\u4ef6\u5e93\u5b58',async function(){
+      if(tcbReady){
+        try{
+          // Reverse gift stock
+          if(rec.giftId){
+            await tcbDb.collection('gifts').doc(rec.giftId).update({used:tcb_.inc(-(rec.qty||1))});
+            var g2=D.gifts.find(function(x){return x.id===rec.giftId||x._id===rec.giftId;});
+            if(g2) g2.used=Math.max(0,g2.used-(rec.qty||1));
+          }
+          // Reverse points
+          if(rec.streamerId){
+            await tcbDb.collection('streamers').doc(rec.streamerId).update({usedPts:tcb_.inc(-rec.ptsUsed)});
+            var s2=D.streamers.find(function(x){return x.id===rec.streamerId||x._id===rec.streamerId;});
+            if(s2) s2.usedPts=Math.max(0,s2.usedPts-rec.ptsUsed);
+          }
+          // Mark as rollback
+          var rbRec={giftId:rec.giftId||'',giftName:'\u3010\u56de\u9000\u3011'+rec.giftName,streamerId:rec.streamerId||'',streamerName:rec.streamerName||'',redeemer:rec.redeemer,operator:rec.operator||'',qty:-(rec.qty||1),ptsUsed:-rec.ptsUsed,ts:Date.now()};
+          var rbAdd=await tcbDb.collection('records').add(rbRec);
+          rbRec.id=rbAdd._id||rbAdd.id||uid();
+          rbRec._id=rbRec.id;
+          D.records=D.records.filter(function(r){return r.id!==id&&r._id!==id;});
+          D.records.unshift(rbRec);
+        }catch(e){
+          toast('\u56de\u9000\u5931\u8d25:'+e.message,'error');
+          return;
+        }
+      }else{
+        if(rec.giftId){var g2=D.gifts.find(function(x){return x.id===rec.giftId;});if(g2)g2.used=Math.max(0,g2.used-(rec.qty||1));}
+        if(rec.streamerId){var s2=D.streamers.find(function(x){return x.id===rec.streamerId;});if(s2)s2.usedPts=Math.max(0,s2.usedPts-rec.ptsUsed);}
+        var rbRec={id:uid(),giftId:rec.giftId||'',giftName:'\u3010\u56de\u9000\u3011'+rec.giftName,streamerId:rec.streamerId||'',streamerName:rec.streamerName||'',redeemer:rec.redeemer,operator:rec.operator||'',qty:-(rec.qty||1),ptsUsed:-rec.ptsUsed,ts:Date.now()};
+        D.records=D.records.filter(function(r){return r.id!==id;});
+        D.records.unshift(rbRec);
+      }
+      save();render();renderRecords();
+      toast('\u5df2\u56de\u9000\u5e76\u8fd4\u8fd8\u79ef\u5206\u5e93\u5b58');
     });
-  }catch(e){toast('回退出错:'+e.message,'error')}
+  }catch(e){toast('\u56de\u9000\u51fa\u9519:'+e.message,'error')}
 }
 
 function renderStreamers(){
@@ -820,17 +950,19 @@ try{
 
 function addGift(){
 try{
-
-  const nm=document.getElementById('gName').value.trim(),em=document.getElementById('gEmoji').value.trim();
-  const q=parseInt(document.getElementById('gQty').value),tier=document.getElementById('gTier').value;
-  const rawCost=parseInt(document.getElementById('gCost')?.value);
-  const cost=isNaN(rawCost)?(TIERS[tier]&&TIERS[tier].threshold)||100:rawCost;
-  if(!nm||q<1||cost<1){toast('请完整填写','error');return}
-  D.gifts.push({id:uid(),name:nm,emoji:em,total:q,used:0,cost,tier});
-  save();render();renderAdminLists();toast(`已添加 ${nm}`);
-  document.getElementById('gName').value='';document.getElementById('gEmoji').value='';document.getElementById('gQty').value='';document.getElementById('gCost').value='';
-
-}catch(e){toast('addGift出错:'+e.message,'error');console.error('addGift',e);}
+  var nm=document.getElementById('gName').value.trim(),em=document.getElementById('gEmoji').value.trim();
+  var q=parseInt(document.getElementById('gQty').value),tier=document.getElementById('gTier').value;
+  var rawCost=parseInt(document.getElementById('gCost')&&document.getElementById('gCost').value);
+  var cost=isNaN(rawCost)?(TIERS[tier]&&TIERS[tier].threshold)||100:rawCost;
+  if(!nm||q<1||cost<1){toast('\u8bf7\u5b8c\u6574\u586b\u5199','error');return}
+  var gid=uid();
+  var g={_id:gid,id:gid,name:nm,emoji:em,total:q,used:0,cost:cost,tier:tier};
+  D.gifts.push(g);
+  if(tcbReady){tcbDb.collection('gifts').add(g).then(function(r){g._id=r._id||r.id||gid;}).catch(function(e){console.error('Cloud add gift err',e)})}
+  save();render();renderAdminLists();toast('\u5df2\u6dfb\u52a0 '+nm);
+  document.getElementById('gName').value='';document.getElementById('gEmoji').value='';document.getElementById('gQty').value='';
+  var ce=document.getElementById('gCost');if(ce)ce.value='';
+}catch(e){toast('addGift\u51fa\u9519:'+e.message,'error');console.error('addGift',e);}
 }
 
 function editGift(id){
@@ -851,19 +983,21 @@ function editGift(id){
 
 function saveGift(id){
   try{
-    const g=D.gifts.find(x=>x.id===id);if(!g)return;
-    const nEl=document.getElementById('egName'),eEl=document.getElementById('egEmoji'),qEl=document.getElementById('egQty'),tEl=document.getElementById('egTier'),cEl=document.getElementById('egCost');
-    if(!nEl||!qEl||!tEl){toast('表单异常，请刷新重试','error');return}
+    var g=D.gifts.find(function(x){return x.id===id||x._id===id;});if(!g)return;
+    var nEl=document.getElementById('egName'),eEl=document.getElementById('egEmoji'),qEl=document.getElementById('egQty'),tEl=document.getElementById('egTier'),cEl=document.getElementById('egCost');
+    if(!nEl||!qEl||!tEl){toast('\u8868\u5355\u5f02\u5e38\uff0c\u8bf7\u5237\u65b0\u91cd\u8bd5','error');return}
     g.name=nEl.value.trim();
     g.emoji=eEl?eEl.value.trim():'';
-    const newQ=parseInt(qEl.value);if(isNaN(newQ)||newQ<1)return;
+    var newQ=parseInt(qEl.value);if(isNaN(newQ)||newQ<1)return;
     g.total=newQ;
     g.tier=tEl.value;
-    const rawC=parseInt(cEl&&cEl.value);g.cost=isNaN(rawC)?g.cost:rawC;
-    if(g.total<g.used){toast('不能小于已兑('+g.used+')','error');return}
-    if(!g.name){toast('请完整填写','error');return}
-    save();cancelGiftEdit();render();renderAdminLists();toast('已保存');
-  }catch(e){toast('保存出错:'+e.message,'error');console.error(e)}
+    var rawC=parseInt(cEl&&cEl.value);g.cost=isNaN(rawC)?g.cost:rawC;
+    if(g.total<g.used){toast('\u4e0d\u80fd\u5c0f\u4e8e\u5df2\u5151('+g.used+')','error');return}
+    if(!g.name){toast('\u8bf7\u5b8c\u6574\u586b\u5199','error');return}
+    var docId=g._id||g.id;
+    if(tcbReady){tcbDb.collection('gifts').doc(docId).update({name:g.name,emoji:g.emoji,total:g.total,tier:g.tier,cost:g.cost}).catch(function(e){console.error('Cloud update gift err',e)})}
+    save();cancelGiftEdit();render();renderAdminLists();toast('\u5df2\u4fdd\u5b58');
+  }catch(e){toast('\u4fdd\u5b58\u51fa\u9519:'+e.message,'error');console.error(e)}
 }
 
 function cancelGiftEdit(){
@@ -880,39 +1014,46 @@ function cancelGiftEdit(){
 
 function delGift(id){
   try{
-    const g=D.gifts.find(x=>x.id===id);
-    if(!g){toast('礼物不存在','error');return}
-    if(g.used>0){toast('有兑换记录，无法删除','error');return}
-    showConfirm('删除「'+g.name+'」？',function(){
-      D.gifts=D.gifts.filter(x=>x.id!==id);
-      save();render();renderAdminLists();toast('已删除');
+    var g=D.gifts.find(function(x){return x.id===id||x._id===id;});
+    if(!g){toast('\u793c\u7269\u4e0d\u5b58\u5728','error');return}
+    if(g.used>0){toast('\u6709\u5151\u6362\u8bb0\u5f55\uff0c\u65e0\u6cd5\u5220\u9664','error');return}
+    showConfirm('\u5220\u9664\u300c'+g.name+'\u300d\uff1f',function(){
+      D.gifts=D.gifts.filter(function(x){return x.id!==id&&x._id!==id;});
+      if(tcbReady){tcbDb.collection('gifts').doc(g._id||g.id).remove().catch(function(e){console.error('Cloud del gift err',e)})}
+      save();render();renderAdminLists();toast('\u5df2\u5220\u9664');
     });
-  }catch(e){toast('删除出错:'+e.message,'error')}
+  }catch(e){toast('\u5220\u9664\u51fa\u9519:'+e.message,'error')}
 }
 
 function addStreamer(){
-  const nm=document.getElementById('sName').value.trim(),rn=(document.getElementById('sRealName')||{}).value?.trim()||'';
-  const p=parseInt(document.getElementById('sPts').value),op=(document.getElementById('sOperator')||{}).value||'';
-  if(!nm||isNaN(p)||p<0){toast('请完整填写','error');return}
-  D.streamers.push({id:uid(),name:nm,realName:rn,operator:op,totalPts:p,usedPts:0});
-  save();render();toast(`已添加 ${nm}`);
+  var nm=document.getElementById('sName').value.trim(),rn=(document.getElementById('sRealName')||{}).value&&document.getElementById('sRealName').value.trim()||'';
+  var p=parseInt(document.getElementById('sPts').value),op=(document.getElementById('sOperator')||{}).value||'';
+  if(!nm||isNaN(p)||p<0){toast('\u8bf7\u5b8c\u6574\u586b\u5199','error');return}
+  var sid=uid();
+  var s={_id:sid,id:sid,name:nm,realName:rn,operator:op,totalPts:p,usedPts:0};
+  D.streamers.push(s);
+  if(tcbReady){tcbDb.collection('streamers').add(s).then(function(r){s._id=r._id||r.id||sid;}).catch(function(e){console.error('Cloud add streamer err',e)})}
+  save();render();toast('\u5df2\u6dfb\u52a0 '+nm);
   document.getElementById('sName').value='';if(document.getElementById('sRealName'))document.getElementById('sRealName').value='';document.getElementById('sPts').value='';
 }
 
 function editStr(id){
-  var s=D.streamers.find(function(x){return x.id===id});if(!s)return;
+  var s=D.streamers.find(function(x){return x.id===id||x._id===id;});if(!s)return;
   var nm2=null,rn2=null,op2=null,tp2=null;
-  showPrompt('昵称',s.name,function(v){
+  showPrompt('\u6635\u79f0',s.name,function(v){
     if(!v)return;nm2=v;
-    showPrompt('实名（选填）',s.realName||'',function(v){
+    showPrompt('\u5b9e\u540d\uff08\u9009\u586b\uff09',s.realName||'',function(v){
       rn2=v||'';
-      showPrompt('运营',s.operator||'',function(v){
+      showPrompt('\u8fd0\u8425',s.operator||'',function(v){
         op2=v||'';
-        showPrompt('累计积分',String(s.totalPts),function(v){
+        showPrompt('\u7d2f\u8ba1\u79ef\u5206',String(s.totalPts),function(v){
           var tp=parseInt(v);if(isNaN(tp)||tp<0)return;tp2=tp;
-          showPrompt('已使用积分',String(s.usedPts),function(v){
+          showPrompt('\u5df2\u4f7f\u7528\u79ef\u5206',String(s.usedPts),function(v){
             var up=parseInt(v);if(isNaN(up)||up<0||up>tp2)return;
-            s.name=nm2;s.realName=rn2;s.operator=op2;s.totalPts=tp2;s.usedPts=up;save();render();
+            s.name=nm2;s.realName=rn2;s.operator=op2;s.totalPts=tp2;s.usedPts=up;
+            var docId=s._id||s.id;
+            if(tcbReady){tcbDb.collection('streamers').doc(docId).update({name:s.name,realName:s.realName,operator:s.operator,totalPts:s.totalPts,usedPts:s.usedPts}).catch(function(e){console.error('Cloud update streamer err',e)})}
+            save();render();
           });
         });
       });
@@ -921,11 +1062,13 @@ function editStr(id){
 }
 
 function delStr(id){
-  if(D.records&&D.records.some(r=>r.streamerId===id)){toast('有兑换记录','error');return}
-  showConfirm('确定删除？',function(){
-    D.streamers=D.streamers.filter(x=>x.id!==id);save();
+  if(D.records&&D.records.some(function(r){return r.streamerId===id;})){toast('\u6709\u5151\u6362\u8bb0\u5f55','error');return}
+  showConfirm('\u786e\u5b9a\u5220\u9664\uff1f',function(){
+    var s=D.streamers.find(function(x){return x.id===id||x._id===id;});
+    D.streamers=D.streamers.filter(function(x){return x.id!==id&&x._id!==id;});
+    if(tcbReady&&s){tcbDb.collection('streamers').doc(s._id||s.id).remove().catch(function(e){console.error('Cloud del streamer err',e)})}
     if(curStreamer===id){curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').textContent=''}
-    render();
+    save();render();
   });
 }
 
@@ -947,8 +1090,26 @@ function importData(e){
 }
 
 function resetAll(){
-  showConfirm('重置清空所有数据？',function(){
-    D=JSON.parse(JSON.stringify(DEF));save();curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').textContent='';render();
+  showConfirm('\u91cd\u7f6e\u6e05\u7a7a\u6240\u6709\u6570\u636e\uff1f',function(){
+    D=JSON.parse(JSON.stringify(DEF));
+    if(tcbReady){
+      // Clear CloudBase collections
+      var cleanGifts=function(items){return items.map(function(g){var ng={name:g.name,emoji:g.emoji,total:g.total,used:0,cost:g.cost,tier:g.tier};return ng;});};
+      var cleanStreamers=function(items){return items.map(function(s){var ns={name:s.name,realName:s.realName,operator:s.operator,totalPts:s.totalPts,usedPts:0};return ns;});};
+      // Delete all and re-insert (bulk not supported, so we do best effort)
+      Promise.all([
+        tcbDb.collection('gifts').get().then(function(r){(r.data||[]).forEach(function(d){tcbDb.collection('gifts').doc(d._id).remove().catch(function(){})})}),
+        tcbDb.collection('streamers').get().then(function(r){(r.data||[]).forEach(function(d){tcbDb.collection('streamers').doc(d._id).remove().catch(function(){})})}),
+        tcbDb.collection('records').get().then(function(r){(r.data||[]).forEach(function(d){tcbDb.collection('records').doc(d._id).remove().catch(function(){})})})
+      ]).then(function(){
+        // Re-insert DEF data
+        setTimeout(function(){
+          D.gifts.forEach(function(g){tcbDb.collection('gifts').add({name:g.name,emoji:g.emoji,total:g.total,used:0,cost:g.cost,tier:g.tier}).catch(function(){})});
+          D.streamers.forEach(function(s){tcbDb.collection('streamers').add({name:s.name,realName:s.realName,operator:s.operator,totalPts:s.totalPts,usedPts:0}).catch(function(){})});
+        },1000);
+      });
+    }
+    save();curStreamer=null;curOperator='';document.getElementById('streamerInput').value='';document.getElementById('operatorSelect').textContent='';render();
   });
 }
 
